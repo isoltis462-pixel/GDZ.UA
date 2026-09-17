@@ -21,7 +21,6 @@
         <section id="step-classes" class="step active">
             <h2>Оберіть свій клас</h2>
             <div class="grid-container classes-grid">
-                <!-- Генеруємо класи від 1 до 11 -->
                 <button class="grid-item" onclick="selectClass(1)">1 клас</button>
                 <button class="grid-item" onclick="selectClass(2)">2 клас</button>
                 <button class="grid-item" onclick="selectClass(3)">3 клас</button>
@@ -41,9 +40,9 @@
             <button class="back-btn" onclick="goBack('step-classes')">⬅ Назад до класів</button>
             <h2>Предмети (9 клас)</h2>
             <div class="grid-container subjects-grid">
+                <button class="grid-item subject" onclick="selectSubject('Укр. мова')">Укр. мова</button>
                 <button class="grid-item subject" onclick="selectSubject('Алгебра')">Алгебра</button>
                 <button class="grid-item subject" onclick="selectSubject('Геометрія')">Геометрія</button>
-                <button class="grid-item subject" onclick="selectSubject('Укр. мова')">Укр. мова</button>
                 <button class="grid-item subject" onclick="selectSubject('Англійська')">Англійська</button>
                 <button class="grid-item subject" onclick="selectSubject('Фізика')">Фізика</button>
                 <button class="grid-item subject" onclick="selectSubject('Хімія')">Хімія</button>
@@ -55,20 +54,61 @@
             <button class="back-btn" onclick="goBack('step-subjects')">⬅ Назад до предметів</button>
             <h2 id="selected-subject-title">Оберіть підручник</h2>
             <div class="books-container">
-                <!-- Приклад карток підручників -->
-                <div class="book-card">
-                    <div class="book-cover mock-cover">Підручник 1</div>
+                <div class="book-card" onclick="openBook('ukr-mova-zabolotny')">
+                    <img src="ukr-mova-9.png" alt="Українська мова 9 клас Заболотний" class="book-cover">
                     <div class="book-info">
-                        <h3>Автор 1</h3>
-                        <p>2022 рік</p>
+                        <h3>Українська мова</h3>
+                        <p>О.В. Заболотний, В.В. Заболотний</p>
+                        <span class="year-tag">9 клас</span>
                     </div>
                 </div>
-                <div class="book-card">
-                    <div class="book-cover mock-cover">Підручник 2</div>
-                    <div class="book-info">
-                        <h3>Автор 2</h3>
-                        <p>2023 рік</p>
-                    </div>
+            </div>
+        </section>
+
+        <!-- Крок 4: Вибір вправи/сторінки (у стилі ГДЗ Онлайн) -->
+        <section id="step-exercises" class="step">
+            <button class="back-btn" onclick="goBack('step-books')">⬅ Назад до підручників</button>
+            <div class="book-header">
+                <img src="ukr-mova-9.png" class="mini-cover" alt="Обкладинка">
+                <div>
+                    <h2>ГДЗ Українська мова 9 клас</h2>
+                    <p>Автори: О.В. Заболотний, В.В. Заболотний</p>
+                </div>
+            </div>
+
+            <div class="exercise-box">
+                <div class="exercise-box-header">
+                    <span class="dot-icon"></span> Оберіть завдання:
+                </div>
+                <div class="exercise-list">
+                    <button class="ex-link" onclick="openSolution('Вправа 1-2')">Вправа 1-2</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 3-4')">Вправа 3-4</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 5-6')">Вправа 5-6</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 7-9')">Вправа 7-9</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 10-11')">Вправа 10-11</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 12-13')">Вправа 12-13</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 14-15')">Вправа 14-15</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 16-18')">Вправа 16-18</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 19-21')">Вправа 19-21</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 22-24')">Вправа 22-24</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 25')">Вправа 25</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 26-27')">Вправа 26-27</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 28-30')">Вправа 28-30</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 31-32')">Вправа 31-32</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 33')">Вправа 33</button>
+                    <button class="ex-link" onclick="openSolution('Вправа 34-36')">Вправа 34-36</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Крок 5: Перегляд розв'язання -->
+        <section id="step-solution" class="step">
+            <button class="back-btn" onclick="goBack('step-exercises')">⬅ Назад до списку вправ</button>
+            <h2 id="solution-title">Розв'язання</h2>
+            <div class="solution-container">
+                <p class="solution-status">Готове рішення вправи:</p>
+                <div class="solution-placeholder">
+                    📌 Тут розміщується фото або текст готового завдання з підручника.
                 </div>
             </div>
         </section>
