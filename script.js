@@ -15,7 +15,8 @@ function selectSubject(subjectName) {
     
     const booksList = document.getElementById('books-list');
     
-    if (subjectName === 'Укр. мова') {
+    // Перевіряємо, чи містить назва предмета слово "Укр"
+    if (subjectName.toLowerCase().includes('укр')) {
         booksList.innerHTML = `
             <div class="book-card" onclick="openBook('ukr-mova-zabolotny')">
                 <img src="ukr-mova-9.png" alt="Українська мова 9 клас Заболотний" class="book-cover">
