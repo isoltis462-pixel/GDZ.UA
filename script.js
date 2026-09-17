@@ -1,3 +1,19 @@
+// Ініціалізація Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
+  authDomain: "keysbrawl-c4ae6.firebaseapp.com",
+  databaseURL: "https://keysbrawl-c4ae6-default-rtdb.firebaseio.com",
+  projectId: "keysbrawl-c4ae6",
+  storageBucket: "keysbrawl-c4ae6.firebasestorage.app",
+  messagingSenderId: "1090859079662",
+  appId: "1:1090859079662:web:932bf6463cb0601083a0ff",
+  measurementId: "G-PJR0BQBYVM"
+};
+
+// Запуск Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
 function selectClass(classNumber) {
     if (classNumber === 9) {
         switchStep('step-classes', 'step-subjects');
@@ -15,7 +31,6 @@ function selectSubject(subjectName) {
     
     const booksList = document.getElementById('books-list');
     
-    // Перевіряємо, чи містить назва предмета слово "Укр"
     if (subjectName.toLowerCase().includes('укр')) {
         booksList.innerHTML = `
             <div class="book-card" onclick="openBook('ukr-mova-zabolotny')">
@@ -44,6 +59,20 @@ function openBook(bookId) {
 
 function openSolution(exName) {
     document.getElementById('solution-title').innerText = exName;
+    const solutionContent = document.getElementById('solution-content');
+
+    // Зчитування розв'язання з Firebase (якщо запис існуватиме в базі)
+    const formattedExKey = exName.replace(/\s+/g, '_');
+    database.ref('solutions/' + formattedExKey).once('value').then((snapshot) => {
+        if (snapshot.exists() && snapshot.val().imageUrl) {
+            solutionContent.innerHTML = `<img src="${snapshot.val().imageUrl}" alt="${exName}" style="max-width:100%; border-radius:8px;">`;
+        } else {
+            solutionContent.innerHTML = `📌 Тут розміщується фото або текст готового завдання (${exName}).`;
+        }
+    }).catch(() => {
+        solutionContent.innerHTML = `📌 Тут розміщується фото або текст готового завдання (${exName}).`;
+    });
+
     switchStep('step-exercises', 'step-solution');
 }
 
