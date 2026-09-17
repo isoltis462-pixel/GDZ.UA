@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ГДЗ.ua - Готові домашні завдання</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase SDK (v9+ compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -53,7 +57,6 @@
         <section id="step-books" class="step">
             <button class="back-btn" onclick="goBack('step-subjects')">⬅ Назад до предметів</button>
             <h2 id="selected-subject-title">Оберіть підручник</h2>
-            <!-- Динамічний список підручників -->
             <div class="books-container" id="books-list"></div>
         </section>
 
@@ -72,7 +75,8 @@
                 <div class="exercise-box-header">
                     <span class="dot-icon"></span> Оберіть завдання:
                 </div>
-                <div class="exercise-list">
+                <div class="exercise-list" id="exercises-list">
+                    <!-- Завдання підвантажуються через JS або залишаються резервні -->
                     <button class="ex-link" onclick="openSolution('Вправа 1-2')">Вправа 1-2</button>
                     <button class="ex-link" onclick="openSolution('Вправа 3-4')">Вправа 3-4</button>
                     <button class="ex-link" onclick="openSolution('Вправа 5-6')">Вправа 5-6</button>
@@ -94,7 +98,7 @@
             <h2 id="solution-title">Розв'язання</h2>
             <div class="solution-container">
                 <p class="solution-status">Готове рішення вправи:</p>
-                <div class="solution-placeholder">
+                <div class="solution-placeholder" id="solution-content">
                     📌 Тут розміщується фото або текст готового завдання з підручника.
                 </div>
             </div>
