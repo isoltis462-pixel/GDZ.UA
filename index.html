@@ -4,165 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ГДЗ.ua - Готові домашні завдання</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <!-- Змінено шлях до стилів -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Хедер -->
+    <!-- Шапка сайту -->
     <header class="header">
-        <div class="container header-container">
-            <a href="#" class="logo">
-                <img src="Gemini_Generated_Image_sy8az4sy8az4sy8a.jpg" alt="ГДЗ.ua Логотип" class="logo-img">
-            </a>
-            
-            <nav class="nav">
-                <ul class="nav-list">
-                    <li><a href="#classes">Класи</a></li>
-                    <li><a href="#subjects">Предмети</a></li>
-                    <li><a href="#books">Підручники</a></li>
-                    <li><a href="#about">Про нас</a></li>
-                </ul>
-            </nav>
-
-            <div class="header-actions">
-                <button class="btn-login">Увійти</button>
-                <button class="burger-menu" id="burger-menu">
-                    <span></span><span></span><span></span>
-                </button>
-            </div>
+        <div class="logo-container">
+            <img src="Gemini_Generated_Image_sy8az4sy8az4sy8a.jpg" alt="ГДЗ.ua" class="logo">
+            <h1>ГДЗ.ua</h1>
         </div>
     </header>
 
-    <!-- Hero-блок -->
-    <section class="hero">
-        <div class="container">
-            <h1>Готові домашні завдання для кожного класу</h1>
-            <p>Знайди відповіді до свого підручника швидко та зручно</p>
-            
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Пошук за підручником, предметом або автором...">
-                <button class="btn-search">Знайти</button>
+    <main class="container">
+        <!-- Крок 1: Вибір класу -->
+        <section id="step-classes" class="step active">
+            <h2>Оберіть свій клас</h2>
+            <div class="grid-container classes-grid">
+                <!-- Генеруємо класи від 1 до 11 -->
+                <button class="grid-item" onclick="selectClass(1)">1 клас</button>
+                <button class="grid-item" onclick="selectClass(2)">2 клас</button>
+                <button class="grid-item" onclick="selectClass(3)">3 клас</button>
+                <button class="grid-item" onclick="selectClass(4)">4 клас</button>
+                <button class="grid-item" onclick="selectClass(5)">5 клас</button>
+                <button class="grid-item" onclick="selectClass(6)">6 клас</button>
+                <button class="grid-item" onclick="selectClass(7)">7 клас</button>
+                <button class="grid-item" onclick="selectClass(8)">8 клас</button>
+                <button class="grid-item active-class" onclick="selectClass(9)">9 клас</button>
+                <button class="grid-item" onclick="selectClass(10)">10 клас</button>
+                <button class="grid-item" onclick="selectClass(11)">11 клас</button>
             </div>
+        </section>
 
-            <div class="class-pills">
-                <a href="#" class="pill">1 клас</a>
-                <a href="#" class="pill">2 клас</a>
-                <a href="#" class="pill">3 клас</a>
-                <a href="#" class="pill">4 клас</a>
-                <a href="#" class="pill">5 клас</a>
-                <a href="#" class="pill">6 клас</a>
-                <a href="#" class="pill">7 клас</a>
-                <a href="#" class="pill">8 клас</a>
-                <a href="#" class="pill">9 клас</a>
-                <a href="#" class="pill">10 клас</a>
-                <a href="#" class="pill">11 клас</a>
+        <!-- Крок 2: Вибір предмета -->
+        <section id="step-subjects" class="step">
+            <button class="back-btn" onclick="goBack('step-classes')">⬅ Назад до класів</button>
+            <h2>Предмети (9 клас)</h2>
+            <div class="grid-container subjects-grid">
+                <button class="grid-item subject" onclick="selectSubject('Алгебра')">Алгебра</button>
+                <button class="grid-item subject" onclick="selectSubject('Геометрія')">Геометрія</button>
+                <button class="grid-item subject" onclick="selectSubject('Укр. мова')">Укр. мова</button>
+                <button class="grid-item subject" onclick="selectSubject('Англійська')">Англійська</button>
+                <button class="grid-item subject" onclick="selectSubject('Фізика')">Фізика</button>
+                <button class="grid-item subject" onclick="selectSubject('Хімія')">Хімія</button>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Популярні предмети -->
-    <section id="subjects" class="section-subjects">
-        <div class="container">
-            <h2>Популярні предмети</h2>
-            <div class="grid-subjects">
-                <div class="subject-card">📐 Математика</div>
-                <div class="subject-card">📖 Українська мова</div>
-                <div class="subject-card">🇬🇧 Англійська мова</div>
-                <div class="subject-card">⚡ Фізика</div>
-                <div class="subject-card">🧪 Хімія</div>
-                <div class="subject-card">🧬 Біологія</div>
-                <div class="subject-card">📜 Історія</div>
-                <div class="subject-card">🌍 Географія</div>
-                <div class="subject-card">💻 Інформатика</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Популярні підручники -->
-    <section id="books" class="section-books">
-        <div class="container">
-            <h2>Популярні підручники</h2>
-            <div class="grid-books">
-                <!-- Картка підручника 1 -->
+        <!-- Крок 3: Вибір підручника -->
+        <section id="step-books" class="step">
+            <button class="back-btn" onclick="goBack('step-subjects')">⬅ Назад до предметів</button>
+            <h2 id="selected-subject-title">Оберіть підручник</h2>
+            <div class="books-container">
+                <!-- Приклад карток підручників -->
                 <div class="book-card">
-                    <div class="book-cover">Алгебра</div>
+                    <div class="book-cover mock-cover">Підручник 1</div>
                     <div class="book-info">
-                        <h3>Алгебра 8 клас</h3>
-                        <p>О.С. Істер</p>
-                        <button class="btn-view">Переглянути ГДЗ</button>
+                        <h3>Автор 1</h3>
+                        <p>2022 рік</p>
                     </div>
                 </div>
-                <!-- Картка підручника 2 -->
                 <div class="book-card">
-                    <div class="book-cover">Фізика</div>
+                    <div class="book-cover mock-cover">Підручник 2</div>
                     <div class="book-info">
-                        <h3>Фізика 8 клас</h3>
-                        <p>В.Г. Бар'яхтар</p>
-                        <button class="btn-view">Переглянути ГДЗ</button>
-                    </div>
-                </div>
-                <!-- Картка підручника 3 -->
-                <div class="book-card">
-                    <div class="book-cover">Укр. мова</div>
-                    <div class="book-info">
-                        <h3>Українська мова 8 клас</h3>
-                        <p>О.В. Заболотний</p>
-                        <button class="btn-view">Переглянути ГДЗ</button>
-                    </div>
-                </div>
-                <!-- Картка підручника 4 -->
-                <div class="book-card">
-                    <div class="book-cover">Геометрія</div>
-                    <div class="book-info">
-                        <h3>Геометрія 8 клас</h3>
-                        <p>А.Г. Мерзляк</p>
-                        <button class="btn-view">Переглянути ГДЗ</button>
+                        <h3>Автор 2</h3>
+                        <p>2023 рік</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <!-- Футер -->
-    <footer class="footer">
-        <div class="container footer-container">
-            <div class="footer-logo-col">
-                <img src="Gemini_Generated_Image_sy8az4sy8az4sy8a.jpg" alt="ГДЗ.ua Логотип" class="footer-logo">
-                <p>Надійний освітній ресурс для школярів України.</p>
-            </div>
-            <div class="footer-links">
-                <h4>Класи</h4>
-                <ul>
-                    <li><a href="#">Молодша школа (1-4)</a></li>
-                    <li><a href="#">Середня школа (5-9)</a></li>
-                    <li><a href="#">Старша школа (10-11)</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h4>Предмети</h4>
-                <ul>
-                    <li><a href="#">Математика</a></li>
-                    <li><a href="#">Українська мова</a></li>
-                    <li><a href="#">Англійська мова</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h4>Проєкт</h4>
-                <ul>
-                    <li><a href="#">Про нас</a></li>
-                    <li><a href="#">Контакти</a></li>
-                    <li><a href="#">Правила використання</a></li>
-                </ul>
-            </div>
+    <!-- Модальне вікно (Повідомлення про недоступність) -->
+    <div id="modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Увага!</h3>
+            <p>Цей клас тимчасово недоступний. Зараз працює лише 9 клас, матеріали для інших класів додаються!</p>
+            <button class="close-btn" onclick="closeModal()">Зрозуміло</button>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 ГДЗ.ua. Всі права захищені.</p>
-        </div>
-    </footer>
+    </div>
 
-    <!-- Змінено шлях до скрипта -->
     <script src="script.js"></script>
 </body>
 </html>
