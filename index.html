@@ -53,19 +53,11 @@
         <section id="step-books" class="step">
             <button class="back-btn" onclick="goBack('step-subjects')">⬅ Назад до предметів</button>
             <h2 id="selected-subject-title">Оберіть підручник</h2>
-            <div class="books-container">
-                <div class="book-card" onclick="openBook('ukr-mova-zabolotny')">
-                    <img src="ukr-mova-9.png" alt="Українська мова 9 клас Заболотний" class="book-cover">
-                    <div class="book-info">
-                        <h3>Українська мова</h3>
-                        <p>О.В. Заболотний, В.В. Заболотний</p>
-                        <span class="year-tag">9 клас</span>
-                    </div>
-                </div>
-            </div>
+            <!-- Динамічний список підручників -->
+            <div class="books-container" id="books-list"></div>
         </section>
 
-        <!-- Крок 4: Вибір вправи/сторінки (у стилі ГДЗ Онлайн) -->
+        <!-- Крок 4: Вибір вправи/сторінки -->
         <section id="step-exercises" class="step">
             <button class="back-btn" onclick="goBack('step-books')">⬅ Назад до підручників</button>
             <div class="book-header">
@@ -92,11 +84,6 @@
                     <button class="ex-link" onclick="openSolution('Вправа 19-21')">Вправа 19-21</button>
                     <button class="ex-link" onclick="openSolution('Вправа 22-24')">Вправа 22-24</button>
                     <button class="ex-link" onclick="openSolution('Вправа 25')">Вправа 25</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 26-27')">Вправа 26-27</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 28-30')">Вправа 28-30</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 31-32')">Вправа 31-32</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 33')">Вправа 33</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 34-36')">Вправа 34-36</button>
                 </div>
             </div>
         </section>
@@ -114,7 +101,7 @@
         </section>
     </main>
 
-    <!-- Модальне вікно (Повідомлення про недоступність) -->
+    <!-- Модальне вікно -->
     <div id="modal" class="modal-overlay">
         <div class="modal-content">
             <h3>Увага!</h3>
