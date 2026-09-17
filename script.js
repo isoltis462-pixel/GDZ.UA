@@ -1,34 +1,46 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Мобільне меню (простий toggle для демонстрації)
-    const burgerMenu = document.getElementById('burger-menu');
-    const navList = document.querySelector('.nav-list');
+// Функція вибору класу
+function selectClass(classNumber) {
+    if (classNumber === 9) {
+        // Якщо 9 клас - переходимо до предметів
+        switchStep('step-classes', 'step-subjects');
+    } else {
+        // Якщо інший клас - показуємо модальне вікно
+        document.getElementById('modal').classList.add('active');
+    }
+}
 
-    burgerMenu.addEventListener('click', () => {
-        if (navList.style.display === 'flex') {
-            navList.style.display = 'none';
-        } else {
-            navList.style.display = 'flex';
-            navList.style.flexDirection = 'column';
-            navList.style.position = 'absolute';
-            navList.style.top = '70px';
-            navList.style.left = '0';
-            navList.style.width = '100%';
-            navList.style.background = 'var(--primary-dark)';
-            navList.style.padding = '20px 0';
-            navList.style.textAlign = 'center';
-        }
-    });
+// Функція закриття модального вікна
+function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+}
 
-    // Проста імітація пошуку
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.querySelector('.btn-search');
+// Функція вибору предмета
+function selectSubject(subjectName) {
+    // Змінюємо заголовок на обраний предмет
+    document.getElementById('selected-subject-title').innerText = `Підручники: ${subjectName}`;
+    // Переходимо до книг
+    switchStep('step-subjects', 'step-books');
+}
 
-    searchBtn.addEventListener('click', () => {
-        const query = searchInput.value.trim();
-        if (query) {
-            alert(`Шукаємо підручники за запитом: "${query}"`);
-        } else {
-            alert('Будь ласка, введіть назву предмета або автора.');
-        }
-    });
+// Універсальна функція перемикання екранів (вперед)
+function switchStep(fromId, toId) {
+    document.getElementById(fromId).classList.remove('active');
+    document.getElementById(toId).classList.add('active');
+}
+
+// Функція кнопки "Назад"
+function goBack(toId) {
+    // Ховаємо всі кроки
+    const steps = document.querySelectorAll('.step');
+    steps.forEach(step => step.classList.remove('active'));
+    
+    // Показуємо потрібний
+    document.getElementById(toId).classList.add('active');
+}
+
+// Закриття модалки при кліку на темний фон поза нею
+document.getElementById('modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
 });
