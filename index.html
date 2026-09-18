@@ -42,6 +42,8 @@
             color: var(--text);
             padding-bottom: 2rem;
             transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+            position: relative;
         }
 
         /* HEADER */
@@ -70,6 +72,7 @@
             gap: 0.75rem;
             text-decoration: none;
             color: inherit;
+            cursor: pointer;
         }
 
         .avatar-img {
@@ -120,7 +123,6 @@
             cursor: pointer;
             font-size: 1.1rem;
             transition: 0.2s;
-            text-decoration: none;
         }
 
         /* SEARCH BAR */
@@ -333,7 +335,7 @@
             color: var(--text-muted);
         }
 
-        /* MODAL / SOLUTION VIEW */
+        /* MODALS */
         .modal {
             position: fixed;
             top: 0;
@@ -466,21 +468,111 @@
             color: var(--text-muted);
             font-size: 1rem;
         }
+
+        /* SECRET ADMIN BUTTON (ПК ТІЛЬКИ, ЗЛІВА ЗНИЗУ) */
+        .admin-pc-btn {
+            display: none;
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: #ef4444;
+            color: white;
+            font-weight: 900;
+            font-size: 1.1rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+            cursor: pointer;
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .admin-pc-btn:hover {
+            transform: scale(1.15);
+        }
+
+        /* Тільки для ПК (екрани більше 1024px) */
+        @media (min-width: 1025px) {
+            .admin-pc-btn {
+                display: flex;
+            }
+        }
+
+        /* ADMIN MODAL FORM STYLES */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+        }
+
+        .btn-submit {
+            background: var(--primary-light);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .task-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+
+        .admin-book-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .del-book-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
     <header>
         <div class="header-container">
-            <a href="#" class="logo-group" onclick="resetToStep(1)">
+            <div class="logo-group" onclick="resetToStep(1)">
                 <img src="Знімок екрана 2026-09-18 140926.jpg" alt="ГДЗ.ua" class="avatar-img" onerror="this.src='https://via.placeholder.com/44?text=ГДЗ'">
                 <div class="logo-text">
                     <span class="logo-title">ГДЗ.UA</span>
                     <span class="logo-subtitle">Готові домашні завдання</span>
                 </div>
-            </a>
+            </div>
             <div class="header-actions">
-                <a href="admin.html" class="icon-btn" title="Адмін-панель">⚙️</a>
                 <button class="icon-btn" id="themeToggle" title="Змінити тему">🌙</button>
             </div>
         </div>
@@ -499,16 +591,19 @@
         </div>
 
         <div id="viewContainer">
-            <!-- ДИНАМІЧНИЙ КОНТЕНТ БУДЕ ТУТ -->
+            <!-- ДИНАМІЧНИЙ КОНТЕНТ -->
         </div>
     </main>
+
+    <!-- СЕКРЕТНА ЧЕРВОНА КНОПКА "А" (Тільки ПК, знизу зліва) -->
+    <button class="admin-pc-btn" onclick="openAdminPrompt()" title="Адмін-панель">А</button>
 
     <!-- МОДАЛЬНЕ ВІКНО РОЗВ'ЯЗКІВ -->
     <div class="modal" id="solutionModal">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title" id="modalBookTitle">Підручник</div>
-                <button class="close-btn" onclick="closeModal()">✕</button>
+                <button class="close-btn" onclick="closeModal('solutionModal')">✕</button>
             </div>
             <div class="modal-body">
                 <div class="section-title" id="unitTypeTitle">Оберіть завдання</div>
@@ -521,8 +616,81 @@
         </div>
     </div>
 
+    <!-- МОДАЛЬНЕ ВІКНО АДМІНКИ -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <div class="modal-title">⚙️ Адмін-панель</div>
+                <button class="close-btn" onclick="closeModal('adminModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="addBookForm">
+                    <div class="form-group">
+                        <label>Клас:</label>
+                        <select id="classSelect" required>
+                            <option value="1">1 клас</option>
+                            <option value="2">2 клас</option>
+                            <option value="3">3 клас</option>
+                            <option value="4">4 клас</option>
+                            <option value="5">5 клас</option>
+                            <option value="6">6 клас</option>
+                            <option value="7">7 клас</option>
+                            <option value="8">8 клас</option>
+                            <option value="9">9 клас</option>
+                            <option value="10">10 клас</option>
+                            <option value="11">11 клас</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Предмет:</label>
+                        <input type="text" id="subjectInput" placeholder="Математика, Англійська мова..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Назва підручника:</label>
+                        <input type="text" id="titleInput" placeholder="напр. Алгебра 8 клас" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Автор(и):</label>
+                        <input type="text" id="authorInput" placeholder="А.Г. Мерзляк" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Обкладинка (фото):</label>
+                        <input type="file" id="coverFileInput" accept="image/*">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Тип завдань:</label>
+                        <select id="unitTypeSelect">
+                            <option value="Номер">Номери (№)</option>
+                            <option value="Вправа">Вправи</option>
+                            <option value="Юніт">Юніти (Unit)</option>
+                            <option value="Завдання">Завдання</option>
+                            <option value="Параграф">Параграфи</option>
+                            <option value="Сторінка">Сторінки (Page)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Додати вправи та фото розв'язків:</label>
+                        <div id="adminTasksContainer"></div>
+                        <button type="button" onclick="addAdminTaskRow()" style="margin-top:0.4rem; padding:0.4rem 0.8rem; cursor:pointer;">+ Додати вправу</button>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Зберегти підручник</button>
+                </form>
+
+                <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
+                <h4>Керування створеними підручниками</h4>
+                <div id="adminBooksList" style="margin-top: 0.5rem;"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // БАЗОВІ ДАНІ ТА СТРУКТУРА (зберігається в localStorage)
         const DEFAULT_SUBJECTS = {
             1: ["Математика", "Українська мова", "Я досліджую світ", "Англійська мова"],
             2: ["Математика", "Українська мова", "Я досліджую світ", "Англійська мова"],
@@ -542,9 +710,12 @@
             return data ? JSON.parse(data) : [];
         }
 
-        // СТАН ДОДАТКУ
+        function saveBooksData(data) {
+            localStorage.setItem('gdz_books_data', JSON.stringify(data));
+        }
+
         let state = {
-            step: 1, // 1: Класи, 2: Предмети, 3: Книги
+            step: 1,
             selectedClass: null,
             selectedSubject: null,
             searchQuery: ''
@@ -554,7 +725,6 @@
         const breadcrumbs = document.getElementById('breadcrumbs');
         const searchInput = document.getElementById('searchInput');
 
-        // ІНІЦІАЛІЗАЦІЯ
         function init() {
             renderView();
             setupSearch();
@@ -578,7 +748,6 @@
             }
         }
 
-        // КРОК 1: КЛАСИ (1-11)
         function renderClasses() {
             let html = `
                 <div class="section-title">Оберіть клас</div>
@@ -602,7 +771,6 @@
             renderView();
         }
 
-        // КРОК 2: ПРЕДМЕТИ
         function renderSubjects() {
             const subjects = DEFAULT_SUBJECTS[state.selectedClass] || [];
             let html = `
@@ -628,7 +796,6 @@
             renderView();
         }
 
-        // КРОК 3: ПІДРУЧНИКИ (АВТОРИ)
         function renderBooks() {
             const allBooks = getBooksData();
             const filteredBooks = allBooks.filter(b => 
@@ -641,8 +808,7 @@
             if (filteredBooks.length === 0) {
                 html += `
                     <div class="empty-msg">
-                        Наразі немає доданих підручників для цього предмета.<br>
-                        Ви можете додати їх через <a href="admin.html" style="color:var(--primary-light)">Адмін-панель</a>.
+                        Наразі немає доданих підручників для цього предмета.
                     </div>
                 `;
             } else {
@@ -664,7 +830,6 @@
             viewContainer.innerHTML = html;
         }
 
-        // ПОШУК
         function setupSearch() {
             searchInput.addEventListener('input', (e) => {
                 state.searchQuery = e.target.value.toLowerCase().trim();
@@ -709,7 +874,6 @@
             renderView();
         }
 
-        // ХЛІБНІ КРИХТИ (НАВІГАЦІЯ)
         function updateBreadcrumbs() {
             let html = `<span class="breadcrumb-item" onclick="resetToStep(1)">Головна</span>`;
 
@@ -736,8 +900,7 @@
             renderView();
         }
 
-        // МОДАЛЬНЕ ВІКНО ТА ВПРАВИ
-        const modal = document.getElementById('solutionModal');
+        // МОДАЛЬНІ ВІКНА
         let currentOpenBook = null;
 
         function openBookModal(bookId) {
@@ -766,7 +929,7 @@
             }
 
             tasksGrid.innerHTML = html;
-            modal.classList.add('active');
+            document.getElementById('solutionModal').classList.add('active');
         }
 
         function showSolution(index, btnEl) {
@@ -789,11 +952,135 @@
             solutionBox.style.display = 'block';
         }
 
-        function closeModal() {
-            modal.classList.remove('active');
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
         }
 
-        // ТЕМА
+        // ПАРОЛЬ ТА АДМІНКА
+        function openAdminPrompt() {
+            const pass = prompt('Введіть пароль від адмін-панелі:');
+            if (pass === '12345678') {
+                renderAdminBooks();
+                document.getElementById('adminModal').classList.add('active');
+            } else if (pass !== null) {
+                alert('Невірний пароль!');
+            }
+        }
+
+        let adminTaskCounter = 0;
+        function addAdminTaskRow(name = '', image = '') {
+            adminTaskCounter++;
+            const container = document.getElementById('adminTasksContainer');
+            const div = document.createElement('div');
+            div.className = 'task-input-group';
+            div.id = `adminTaskRow_${adminTaskCounter}`;
+
+            div.innerHTML = `
+                <input type="text" placeholder="№" value="${name}" class="task-name" style="width:70px;" required>
+                <input type="file" accept="image/*" class="task-file">
+                <button type="button" onclick="this.parentElement.remove()" style="background:#ef4444; color:white; border:none; padding:0.3rem 0.6rem; border-radius:4px; cursor:pointer;">✕</button>
+            `;
+            container.appendChild(div);
+        }
+
+        // За замовчуванням 3 поля в адмінці
+        addAdminTaskRow('1');
+        addAdminTaskRow('2');
+        addAdminTaskRow('3');
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) resolve('');
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        document.getElementById('addBookForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const classNum = document.getElementById('classSelect').value;
+            const subject = document.getElementById('subjectInput').value.trim();
+            const title = document.getElementById('titleInput').value.trim();
+            const author = document.getElementById('authorInput').value.trim();
+            const unitType = document.getElementById('unitTypeSelect').value;
+            const coverFile = document.getElementById('coverFileInput').files[0];
+
+            let coverBase64 = '';
+            if (coverFile) {
+                coverBase64 = await fileToBase64(coverFile);
+            }
+
+            const taskRows = document.querySelectorAll('#adminTasksContainer .task-input-group');
+            const tasks = [];
+
+            for (let row of taskRows) {
+                const name = row.querySelector('.task-name').value.trim();
+                const file = row.querySelector('.task-file').files[0];
+                let imgBase64 = '';
+                if (file) {
+                    imgBase64 = await fileToBase64(file);
+                }
+                if (name) {
+                    tasks.push({ name, image: imgBase64 });
+                }
+            }
+
+            const newBook = {
+                id: 'book_' + Date.now(),
+                classNum,
+                subject,
+                title,
+                author,
+                unitType,
+                cover: coverBase64,
+                tasks
+            };
+
+            const books = getBooksData();
+            books.push(newBook);
+            saveBooksData(books);
+
+            alert('Підручник успішно збережено!');
+            closeModal('adminModal');
+            renderView();
+        });
+
+        function renderAdminBooks() {
+            const books = getBooksData();
+            const container = document.getElementById('adminBooksList');
+
+            if (books.length === 0) {
+                container.innerHTML = '<p style="color:gray;">Немає створених підручників</p>';
+                return;
+            }
+
+            let html = '';
+            books.forEach(b => {
+                html += `
+                    <div class="admin-book-item">
+                        <div>
+                            <strong>${b.title}</strong> (${b.classNum} кл — ${b.subject})
+                        </div>
+                        <button class="del-book-btn" onclick="deleteBook('${b.id}')">Видалити</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function deleteBook(id) {
+            if (confirm('Видалити цей підручник?')) {
+                let books = getBooksData();
+                books = books.filter(b => b.id !== id);
+                saveBooksData(books);
+                renderAdminBooks();
+                renderView();
+            }
+        }
+
         function setupTheme() {
             const btn = document.getElementById('themeToggle');
             btn.addEventListener('click', () => {
