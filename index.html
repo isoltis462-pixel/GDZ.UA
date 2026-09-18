@@ -46,7 +46,6 @@
             position: relative;
         }
 
-        /* HEADER */
         header {
             background-color: var(--surface);
             border-bottom: 1px solid var(--border);
@@ -125,7 +124,6 @@
             transition: 0.2s;
         }
 
-        /* SEARCH BAR */
         .search-section {
             max-width: 1100px;
             margin: 1rem auto 0;
@@ -163,7 +161,6 @@
             pointer-events: none;
         }
 
-        /* MAIN CONTENT & BREADCRUMBS */
         main {
             max-width: 1100px;
             margin: 1rem auto;
@@ -204,7 +201,6 @@
             justify-content: space-between;
         }
 
-        /* STEP 1: CLASSES GRID */
         .grid-classes {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
@@ -241,7 +237,6 @@
             color: var(--primary-light);
         }
 
-        /* STEP 2: SUBJECTS GRID */
         .grid-subjects {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -272,7 +267,6 @@
             color: var(--primary-light);
         }
 
-        /* STEP 3: BOOKS GRID */
         .grid-books {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -335,7 +329,6 @@
             color: var(--text-muted);
         }
 
-        /* MODALS */
         .modal {
             position: fixed;
             top: 0;
@@ -469,7 +462,6 @@
             font-size: 1rem;
         }
 
-        /* SECRET ADMIN BUTTON (ПК ТІЛЬКИ, ЗЛІВА ЗНИЗУ) */
         .admin-pc-btn {
             display: none;
             position: fixed;
@@ -495,14 +487,12 @@
             transform: scale(1.15);
         }
 
-        /* Тільки для ПК (екрани більше 1024px) */
         @media (min-width: 1025px) {
             .admin-pc-btn {
                 display: flex;
             }
         }
 
-        /* ADMIN MODAL FORM STYLES */
         .form-group {
             margin-bottom: 1rem;
         }
@@ -533,6 +523,18 @@
             font-weight: 700;
             width: 100%;
             cursor: pointer;
+        }
+
+        .btn-export {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 1rem;
         }
 
         .task-input-group {
@@ -595,10 +597,8 @@
         </div>
     </main>
 
-    <!-- СЕКРЕТНА ЧЕРВОНА КНОПКА "А" (Тільки ПК, знизу зліва) -->
     <button class="admin-pc-btn" onclick="openAdminPrompt()" title="Адмін-панель">А</button>
 
-    <!-- МОДАЛЬНЕ ВІКНО РОЗВ'ЯЗКІВ -->
     <div class="modal" id="solutionModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -616,7 +616,6 @@
         </div>
     </div>
 
-    <!-- МОДАЛЬНЕ ВІКНО АДМІНКИ -->
     <div class="modal" id="adminModal">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
@@ -683,6 +682,8 @@
                     <button type="submit" class="btn-submit">Зберегти підручник</button>
                 </form>
 
+                <button type="button" class="btn-export" onclick="exportBooksJSON()">📥 Завантажити books.json для GitHub</button>
+
                 <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
                 <h4>Керування створеними підручниками</h4>
                 <div id="adminBooksList" style="margin-top: 0.5rem;"></div>
@@ -705,13 +706,36 @@
             11: ["Алгебра", "Геометрія", "Фізика", "Хімія", "Біологія", "Українська мова", "Англійська мова", "Історія"]
         };
 
-        function getBooksData() {
-            const data = localStorage.getItem('gdz_books_data');
-            return data ? JSON.parse(data) : [];
+        let booksData = [];
+
+        async function loadBooksData() {
+            try {
+                const res = await fetch('books.json');
+                if (res.ok) {
+                    booksData = await res.json();
+                } else {
+                    const local = localStorage.getItem('gdz_books_data');
+                    booksData = local ? JSON.parse(local) : [];
+                }
+            } catch (e) {
+                const local = localStorage.getItem('gdz_books_data');
+                booksData = local ? JSON.parse(local) : [];
+            }
+            renderView();
         }
 
-        function saveBooksData(data) {
-            localStorage.setItem('gdz_books_data', JSON.stringify(data));
+        function saveBooksData() {
+            localStorage.setItem('gdz_books_data', JSON.stringify(booksData));
+        }
+
+        function exportBooksJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(booksData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "books.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
         }
 
         let state = {
@@ -726,7 +750,7 @@
         const searchInput = document.getElementById('searchInput');
 
         function init() {
-            renderView();
+            loadBooksData();
             setupSearch();
             setupTheme();
         }
@@ -797,8 +821,7 @@
         }
 
         function renderBooks() {
-            const allBooks = getBooksData();
-            const filteredBooks = allBooks.filter(b => 
+            const filteredBooks = booksData.filter(b => 
                 Number(b.classNum) === Number(state.selectedClass) && 
                 b.subject.toLowerCase() === state.selectedSubject.toLowerCase()
             );
@@ -838,8 +861,7 @@
         }
 
         function renderSearchResults() {
-            const allBooks = getBooksData();
-            const results = allBooks.filter(b => 
+            const results = booksData.filter(b => 
                 b.title.toLowerCase().includes(state.searchQuery) ||
                 b.author.toLowerCase().includes(state.searchQuery) ||
                 b.subject.toLowerCase().includes(state.searchQuery)
@@ -900,12 +922,10 @@
             renderView();
         }
 
-        // МОДАЛЬНІ ВІКНА
         let currentOpenBook = null;
 
         function openBookModal(bookId) {
-            const allBooks = getBooksData();
-            currentOpenBook = allBooks.find(b => b.id === bookId);
+            currentOpenBook = booksData.find(b => b.id === bookId);
             if (!currentOpenBook) return;
 
             document.getElementById('modalBookTitle').innerText = `${currentOpenBook.title} — ${currentOpenBook.author}`;
@@ -956,7 +976,6 @@
             document.getElementById(id).classList.remove('active');
         }
 
-        // ПАРОЛЬ ТА АДМІНКА
         function openAdminPrompt() {
             const pass = prompt('Введіть пароль від адмін-панелі:');
             if (pass === '12345678') {
@@ -983,7 +1002,6 @@
             container.appendChild(div);
         }
 
-        // За замовчуванням 3 поля в адмінці
         addAdminTaskRow('1');
         addAdminTaskRow('2');
         addAdminTaskRow('3');
@@ -1039,26 +1057,24 @@
                 tasks
             };
 
-            const books = getBooksData();
-            books.push(newBook);
-            saveBooksData(books);
+            booksData.push(newBook);
+            saveBooksData();
 
-            alert('Підручник успішно збережено!');
+            alert('Підручник збережено! Не забудьте натиснути "Завантажити books.json" та закинути його на GitHub!');
             closeModal('adminModal');
             renderView();
         });
 
         function renderAdminBooks() {
-            const books = getBooksData();
             const container = document.getElementById('adminBooksList');
 
-            if (books.length === 0) {
+            if (booksData.length === 0) {
                 container.innerHTML = '<p style="color:gray;">Немає створених підручників</p>';
                 return;
             }
 
             let html = '';
-            books.forEach(b => {
+            booksData.forEach(b => {
                 html += `
                     <div class="admin-book-item">
                         <div>
@@ -1073,9 +1089,8 @@
 
         function deleteBook(id) {
             if (confirm('Видалити цей підручник?')) {
-                let books = getBooksData();
-                books = books.filter(b => b.id !== id);
-                saveBooksData(books);
+                booksData = booksData.filter(b => b.id !== id);
+                saveBooksData();
                 renderAdminBooks();
                 renderView();
             }
