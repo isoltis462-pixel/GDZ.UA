@@ -3,70 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Панель Адміністратора</title>
+    <title>Панель Адміністратора - ГДЗ.ua</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="admin-page">
+<body class="admin-body">
 
-    <header class="header admin-header">
-        <div class="container header-container">
-            <h1>⚙️ Панель Управління</h1>
-            <a href="index.html" class="btn btn-secondary">← На головну</a>
-        </div>
-    </header>
+    <div class="admin-wrapper">
+        <header class="admin-header">
+            <h2>⚙️ Управління сайтом ГДЗ.ua</h2>
+            <a href="index.html" class="btn-back">← На головну</a>
+        </header>
 
-    <main class="container">
-        <section class="admin-panel">
-            
-            <!-- Доступність класів -->
-            <div class="admin-block">
-                <h2>1. Статус класів (1-11)</h2>
-                <p class="section-desc">Поставити галочку = відкрити доступ до класу на сайті:</p>
-                <div class="class-toggle-list" id="adminClassToggles">
-                    <!-- Генерується через script.js -->
-                </div>
-            </div>
-
-            <!-- Форма додавання / редагування вправ -->
-            <div class="admin-block">
-                <h2 id="formTitle">2. Додати вправу</h2>
-                <form id="exerciseForm" onsubmit="handleFormSubmit(event)">
-                    <input type="hidden" id="editIndex" value="-1">
-                    
-                    <div class="form-group">
-                        <label for="classSelect">Клас:</label>
-                        <select id="classSelect" required>
-                            <!-- Генерується через script.js -->
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="exerciseTitle">Назва / Номер вправи:</label>
-                        <input type="text" id="exerciseTitle" placeholder="Наприклад: Вправа 12, ст. 45" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="imagePath">Шлях до фото (GitHub URL або відносний шлях):</label>
-                        <input type="text" id="imagePath" placeholder="img/class9/ex12.png або посилання з GitHub" required>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-success" id="saveBtn">Зберегти вправу</button>
-                        <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display:none;" onclick="resetForm()">Скасувати</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Список вправ (CRUD) -->
-            <div class="admin-block">
-                <h2>3. База доданих вправ</h2>
-                <div id="adminExercisesList" class="admin-exercises-list">
-                    <!-- Генерується через script.js -->
-                </div>
-            </div>
-
+        <section class="admin-card">
+            <h3>1. Доступність класів (1-11)</h3>
+            <p class="hint">Відмітьте класи, які повинні бути відкриті для користувачів:</p>
+            <div class="toggles-grid" id="adminClassToggles"></div>
         </section>
-    </main>
+
+        <section class="admin-card">
+            <h3 id="formTitle">2. Додати / Редагувати вправу</h3>
+            <form id="exerciseForm" onsubmit="saveExercise(event)">
+                <input type="hidden" id="editIndex" value="-1">
+                
+                <div class="form-group">
+                    <label for="classSelect">Клас:</label>
+                    <select id="classSelect" required></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="exerciseTitle">Назва / Номер вправи:</label>
+                    <input type="text" id="exerciseTitle" placeholder="Наприклад: Вправа 15, ст. 40" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="imagePath">Шлях до зображення (GitHub або URL):</label>
+                    <input type="text" id="imagePath" placeholder="img/class9/ex15.png" required>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit" class="btn-save" id="saveBtn">Зберегти</button>
+                    <button type="button" class="btn-cancel" id="cancelBtn" style="display:none;" onclick="resetForm()">Скасувати</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="admin-card">
+            <h3>3. Список вправ у базі</h3>
+            <div id="adminExercisesList"></div>
+        </section>
+    </div>
 
     <script src="script.js"></script>
 </body>
