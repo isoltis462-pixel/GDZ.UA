@@ -5,112 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ГДЗ.ua - Готові домашні завдання</title>
     <link rel="stylesheet" href="style.css">
-    
-    <!-- Firebase SDK (v9+ compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-    <!-- Шапка сайту -->
     <header class="header">
-        <div class="logo-container">
-            <img src="Gemini_Generated_Image_sy8az4sy8az4sy8a.jpg" alt="ГДЗ.ua" class="logo">
-            <h1>ГДЗ.ua</h1>
-        </div>
+        <a href="admin.html" class="admin-link">⚙️ Адмінка</a>
     </header>
 
-    <main class="container">
-        <!-- Крок 1: Вибір класу -->
-        <section id="step-classes" class="step active">
-            <h2>Оберіть свій клас</h2>
-            <div class="grid-container classes-grid">
-                <button class="grid-item" onclick="selectClass(1)">1 клас</button>
-                <button class="grid-item" onclick="selectClass(2)">2 клас</button>
-                <button class="grid-item" onclick="selectClass(3)">3 клас</button>
-                <button class="grid-item" onclick="selectClass(4)">4 клас</button>
-                <button class="grid-item" onclick="selectClass(5)">5 клас</button>
-                <button class="grid-item" onclick="selectClass(6)">6 клас</button>
-                <button class="grid-item" onclick="selectClass(7)">7 клас</button>
-                <button class="grid-item" onclick="selectClass(8)">8 клас</button>
-                <button class="grid-item active-class" onclick="selectClass(9)">9 клас</button>
-                <button class="grid-item" onclick="selectClass(10)">10 клас</button>
-                <button class="grid-item" onclick="selectClass(11)">11 клас</button>
+    <main class="main-container">
+        <!-- Ліва частина з логотипом -->
+        <div class="logo-section">
+            <div class="logo-circle">
+                <div class="trident">🔱</div>
+                <div class="logo-text">ГДЗ.ua</div>
+                <div class="book-icon">📖</div>
             </div>
-        </section>
+        </div>
 
-        <!-- Крок 2: Вибір предмета -->
-        <section id="step-subjects" class="step">
-            <button class="back-btn" onclick="goBack('step-classes')">⬅ Назад до класів</button>
-            <h2>Предмети (9 клас)</h2>
-            <div class="grid-container subjects-grid">
-                <button class="grid-item subject" onclick="selectSubject('Укр. мова')">Укр. мова</button>
-                <button class="grid-item subject" onclick="selectSubject('Алгебра')">Алгебра</button>
-                <button class="grid-item subject" onclick="selectSubject('Геометрія')">Геометрія</button>
-                <button class="grid-item subject" onclick="selectSubject('Англійська')">Англійська</button>
-                <button class="grid-item subject" onclick="selectSubject('Фізика')">Фізика</button>
-                <button class="grid-item subject" onclick="selectSubject('Хімія')">Хімія</button>
-            </div>
-        </section>
-
-        <!-- Крок 3: Вибір підручника -->
-        <section id="step-books" class="step">
-            <button class="back-btn" onclick="goBack('step-subjects')">⬅ Назад до предметів</button>
-            <h2 id="selected-subject-title">Оберіть підручник</h2>
-            <div class="books-container" id="books-list"></div>
-        </section>
-
-        <!-- Крок 4: Вибір вправи/сторінки -->
-        <section id="step-exercises" class="step">
-            <button class="back-btn" onclick="goBack('step-books')">⬅ Назад до підручників</button>
-            <div class="book-header">
-                <img src="ukr-mova-9.png" class="mini-cover" alt="Обкладинка">
-                <div>
-                    <h2>ГДЗ Українська мова 9 клас</h2>
-                    <p>Автори: О.В. Заболотний, В.В. Заболотний</p>
-                </div>
+        <!-- Права частина з вибором класів -->
+        <div class="content-section">
+            <h1 class="main-title">Оберіть клас</h1>
+            
+            <div class="classes-grid" id="classesGrid">
+                <!-- Кнопки класів 1-11 генеруються скріптом -->
             </div>
 
-            <div class="exercise-box">
-                <div class="exercise-box-header">
-                    <span class="dot-icon"></span> Оберіть завдання:
-                </div>
-                <div class="exercise-list" id="exercises-list">
-                    <!-- Завдання підвантажуються через JS або залишаються резервні -->
-                    <button class="ex-link" onclick="openSolution('Вправа 1-2')">Вправа 1-2</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 3-4')">Вправа 3-4</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 5-6')">Вправа 5-6</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 7-9')">Вправа 7-9</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 10-11')">Вправа 10-11</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 12-13')">Вправа 12-13</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 14-15')">Вправа 14-15</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 16-18')">Вправа 16-18</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 19-21')">Вправа 19-21</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 22-24')">Вправа 22-24</button>
-                    <button class="ex-link" onclick="openSolution('Вправа 25')">Вправа 25</button>
-                </div>
+            <!-- Блок відображення вправ вибраного класу -->
+            <div id="exercisesContainer" class="exercises-container" style="display: none;">
+                <h2 id="selectedClassHeader">Вправи</h2>
+                <div id="exercisesList"></div>
             </div>
-        </section>
-
-        <!-- Крок 5: Перегляд розв'язання -->
-        <section id="step-solution" class="step">
-            <button class="back-btn" onclick="goBack('step-exercises')">⬅ Назад до списку вправ</button>
-            <h2 id="solution-title">Розв'язання</h2>
-            <div class="solution-container">
-                <p class="solution-status">Готове рішення вправи:</p>
-                <div class="solution-placeholder" id="solution-content">
-                    📌 Тут розміщується фото або текст готового завдання з підручника.
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
 
-    <!-- Модальне вікно -->
-    <div id="modal" class="modal-overlay">
-        <div class="modal-content">
+    <!-- Модальне вікно (з виправленою кнопкою "Зрозуміло") -->
+    <div id="modalOverlay" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
             <h3>Увага!</h3>
-            <p>Цей клас тимчасово недоступний. Зараз працює лише 9 клас, матеріали для інших класів додаються!</p>
-            <button class="close-btn" onclick="closeModal()">Зрозуміло</button>
+            <p id="modalText">Цей клас тимчасово недоступний. Зараз працює лише 9 клас, матеріали для інших класів додаються!</p>
+            <button type="button" class="btn-modal" onclick="closeModal()">Зрозуміло</button>
         </div>
     </div>
 
