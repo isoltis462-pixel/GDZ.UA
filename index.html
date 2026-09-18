@@ -243,6 +243,10 @@
             gap: 0.75rem;
         }
 
+        .subject-card-wrapper {
+            position: relative;
+        }
+
         .subject-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -259,6 +263,7 @@
             align-items: center;
             justify-content: center;
             min-height: 90px;
+            width: 100%;
         }
 
         .subject-card:active, .subject-card:hover {
@@ -525,16 +530,16 @@
             cursor: pointer;
         }
 
-        .btn-export {
-            background: #10b981;
+        .btn-cancel-edit {
+            background: #64748b;
             color: white;
             border: none;
-            padding: 0.75rem;
+            padding: 0.5rem;
             border-radius: 8px;
             font-weight: 700;
             width: 100%;
             cursor: pointer;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
         }
 
         .task-input-group {
@@ -548,9 +553,25 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.5rem 0;
+            padding: 0.6rem 0;
             border-bottom: 1px solid var(--border);
             font-size: 0.85rem;
+            gap: 0.5rem;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 0.3rem;
+        }
+
+        .edit-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
         }
 
         .del-book-btn {
@@ -560,6 +581,19 @@
             padding: 0.3rem 0.6rem;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-add-subject {
+            background: var(--surface);
+            border: 1px dashed var(--primary-light);
+            color: var(--primary-light);
+            border-radius: var(--radius-md);
+            padding: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -619,11 +653,13 @@
     <div class="modal" id="adminModal">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <div class="modal-title">⚙️ Адмін-панель</div>
+                <div class="modal-title" id="adminModalTitle">⚙️ Додати підручник</div>
                 <button class="close-btn" onclick="closeModal('adminModal')">✕</button>
             </div>
             <div class="modal-body">
                 <form id="addBookForm">
+                    <input type="hidden" id="editingBookId" value="">
+                    
                     <div class="form-group">
                         <label>Клас:</label>
                         <select id="classSelect" required>
@@ -643,7 +679,7 @@
 
                     <div class="form-group">
                         <label>Предмет:</label>
-                        <input type="text" id="subjectInput" placeholder="Математика, Англійська мова..." required>
+                        <input type="text" id="subjectInput" placeholder="Математика, Алгебра..." required>
                     </div>
 
                     <div class="form-group">
@@ -659,6 +695,7 @@
                     <div class="form-group">
                         <label>Обкладинка (фото):</label>
                         <input type="file" id="coverFileInput" accept="image/*">
+                        <small id="coverNotice" style="color: gray; display: block; margin-top: 2px;"></small>
                     </div>
 
                     <div class="form-group">
@@ -674,24 +711,42 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Додати вправи та фото розв'язків:</label>
+                        <label>Вправи та фото розв'язків:</label>
                         <div id="adminTasksContainer"></div>
-                        <button type="button" onclick="addAdminTaskRow()" style="margin-top:0.4rem; padding:0.4rem 0.8rem; cursor:pointer;">+ Додати вправу</button>
+                        <button type="button" onclick="addAdminTaskRow()" style="margin-top:0.4rem; padding:0.4rem 0.8rem; cursor:pointer; border-radius: 6px;">+ Додати вправу</button>
                     </div>
 
-                    <button type="submit" class="btn-submit">Зберегти підручник</button>
+                    <button type="submit" class="btn-submit" id="submitBookBtn">Зберегти підручник</button>
+                    <button type="button" class="btn-cancel-edit" id="cancelEditBtn" style="display:none;" onclick="resetAdminForm()">Скасувати редагування</button>
                 </form>
 
-                <button type="button" class="btn-export" onclick="exportBooksJSON()">📥 Завантажити books.json для GitHub</button>
-
                 <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
-                <h4>Керування створеними підручниками</h4>
+                <h4>Керування збереженими підручниками</h4>
                 <div id="adminBooksList" style="margin-top: 0.5rem;"></div>
             </div>
         </div>
     </div>
 
-    <script>
+    <!-- Firebase SDK (v9 Mod) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
+            authDomain: "keysbrawl-c4ae6.firebaseapp.com",
+            databaseURL: "https://keysbrawl-c4ae6-default-rtdb.firebaseio.com",
+            projectId: "keysbrawl-c4ae6",
+            storageBucket: "keysbrawl-c4ae6.firebasestorage.app",
+            messagingSenderId: "1090859079662",
+            appId: "1:1090859079662:web:932bf6463cb0601083a0ff",
+            measurementId: "G-PJR0BQBYVM"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
         const DEFAULT_SUBJECTS = {
             1: ["Математика", "Українська мова", "Я досліджую світ", "Англійська мова"],
             2: ["Математика", "Українська мова", "Я досліджую світ", "Англійська мова"],
@@ -707,36 +762,8 @@
         };
 
         let booksData = [];
-
-        async function loadBooksData() {
-            try {
-                const res = await fetch('books.json');
-                if (res.ok) {
-                    booksData = await res.json();
-                } else {
-                    const local = localStorage.getItem('gdz_books_data');
-                    booksData = local ? JSON.parse(local) : [];
-                }
-            } catch (e) {
-                const local = localStorage.getItem('gdz_books_data');
-                booksData = local ? JSON.parse(local) : [];
-            }
-            renderView();
-        }
-
-        function saveBooksData() {
-            localStorage.setItem('gdz_books_data', JSON.stringify(booksData));
-        }
-
-        function exportBooksJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(booksData, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "books.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
+        let customSubjects = {};
+        let isAdminLoggedIn = false;
 
         let state = {
             step: 1,
@@ -749,8 +776,32 @@
         const breadcrumbs = document.getElementById('breadcrumbs');
         const searchInput = document.getElementById('searchInput');
 
+        // Слухаємо базу даних Firebase у реальному часі
+        function listenDatabase() {
+            const booksRef = ref(db, 'books');
+            onValue(booksRef, (snapshot) => {
+                const data = snapshot.val();
+                booksData = [];
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        booksData.push({ id: key, ...data[key] });
+                    });
+                }
+                renderView();
+                if (document.getElementById('adminModal').classList.contains('active')) {
+                    renderAdminBooks();
+                }
+            });
+
+            const subjectsRef = ref(db, 'customSubjects');
+            onValue(subjectsRef, (snapshot) => {
+                customSubjects = snapshot.val() || {};
+                renderView();
+            });
+        }
+
         function init() {
-            loadBooksData();
+            listenDatabase();
             setupSearch();
             setupTheme();
         }
@@ -779,7 +830,7 @@
             `;
             for (let i = 1; i <= 11; i++) {
                 html += `
-                    <div class="class-card" onclick="selectClass(${i})">
+                    <div class="class-card" onclick="window.selectClass(${i})">
                         ${i} клас
                         <span>підручники</span>
                     </div>
@@ -789,23 +840,42 @@
             viewContainer.innerHTML = html;
         }
 
-        function selectClass(cls) {
+        window.selectClass = function(cls) {
             state.selectedClass = cls;
             state.step = 2;
             renderView();
         }
 
         function renderSubjects() {
-            const subjects = DEFAULT_SUBJECTS[state.selectedClass] || [];
+            const defaultList = DEFAULT_SUBJECTS[state.selectedClass] || [];
+            const customList = customSubjects[state.selectedClass] || [];
+            
+            // Об'єднуємо унікальні предмети
+            const subjects = Array.from(new Set([...defaultList, ...customList]));
+
             let html = `
-                <div class="section-title">Оберіть предмет (${state.selectedClass} клас)</div>
-                <div class="grid-subjects">
+                <div class="section-title">
+                    Оберіть предмет (${state.selectedClass} клас)
+                </div>
             `;
+
+            if (isAdminLoggedIn) {
+                html += `
+                    <div class="btn-add-subject" onclick="window.addCustomSubjectPrompt()">
+                        + Додати новий предмет у ${state.selectedClass} клас
+                    </div>
+                `;
+            }
+
+            html += `<div class="grid-subjects">`;
             
             subjects.forEach(subj => {
                 html += `
-                    <div class="subject-card" onclick="selectSubject('${subj}')">
-                        ${subj}
+                    <div class="subject-card-wrapper">
+                        <div class="subject-card" onclick="window.selectSubject('${subj}')">
+                            ${subj}
+                        </div>
+                        ${isAdminLoggedIn ? `<button onclick="window.deleteSubjectPrompt('${subj}')" title="Видалити предмет" style="position:absolute; top:5px; right:5px; background:#ef4444; color:white; border:none; border-radius:50%; width:22px; height:22px; cursor:pointer; font-size:10px; font-weight:bold;">✕</button>` : ''}
                     </div>
                 `;
             });
@@ -814,10 +884,41 @@
             viewContainer.innerHTML = html;
         }
 
-        function selectSubject(subj) {
+        window.selectSubject = function(subj) {
             state.selectedSubject = subj;
             state.step = 3;
             renderView();
+        }
+
+        window.addCustomSubjectPrompt = function() {
+            const subjName = prompt(`Введіть назву нового предмета для ${state.selectedClass} класу:`);
+            if (subjName && subjName.trim() !== '') {
+                const cls = state.selectedClass;
+                const current = customSubjects[cls] || [];
+                if (!current.includes(subjName.trim())) {
+                    current.push(subjName.trim());
+                    set(ref(db, `customSubjects/${cls}`), current);
+                }
+            }
+        }
+
+        window.deleteSubjectPrompt = function(subj) {
+            if (confirm(`Видалити предмет "${subj}" з ${state.selectedClass} класу?`)) {
+                const cls = state.selectedClass;
+                
+                // Видаляємо з кастомних предметів
+                if (customSubjects[cls]) {
+                    const updated = customSubjects[cls].filter(s => s !== subj);
+                    set(ref(db, `customSubjects/${cls}`), updated);
+                }
+
+                // Видаляємо всі книги, що належать цьому предмету та класу
+                booksData.forEach(book => {
+                    if (Number(book.classNum) === Number(cls) && book.subject.toLowerCase() === subj.toLowerCase()) {
+                        remove(ref(db, `books/${book.id}`));
+                    }
+                });
+            }
         }
 
         function renderBooks() {
@@ -838,7 +939,7 @@
                 html += `<div class="grid-books">`;
                 filteredBooks.forEach(book => {
                     html += `
-                        <div class="book-card" onclick="openBookModal('${book.id}')">
+                        <div class="book-card" onclick="window.openBookModal('${book.id}')">
                             ${book.cover ? `<img src="${book.cover}" class="book-cover">` : `<div class="book-cover">${book.title}</div>`}
                             <div class="book-info">
                                 <div class="book-title">${book.title}</div>
@@ -867,7 +968,7 @@
                 b.subject.toLowerCase().includes(state.searchQuery)
             );
 
-            breadcrumbs.innerHTML = `<span class="breadcrumb-item" onclick="clearSearch()">Результати пошуку ("${state.searchQuery}")</span>`;
+            breadcrumbs.innerHTML = `<span class="breadcrumb-item" onclick="window.clearSearch()">Результати пошуку ("${state.searchQuery}")</span>`;
 
             if (results.length === 0) {
                 viewContainer.innerHTML = `<div class="empty-msg">Нічого не знайдено</div>`;
@@ -877,7 +978,7 @@
             let html = `<div class="grid-books">`;
             results.forEach(book => {
                 html += `
-                    <div class="book-card" onclick="openBookModal('${book.id}')">
+                    <div class="book-card" onclick="window.openBookModal('${book.id}')">
                         ${book.cover ? `<img src="${book.cover}" class="book-cover">` : `<div class="book-cover">${book.title}</div>`}
                         <div class="book-info">
                             <div class="book-title">${book.title} (${book.classNum} кл)</div>
@@ -890,17 +991,17 @@
             viewContainer.innerHTML = html;
         }
 
-        function clearSearch() {
+        window.clearSearch = function() {
             searchInput.value = '';
             state.searchQuery = '';
             renderView();
         }
 
         function updateBreadcrumbs() {
-            let html = `<span class="breadcrumb-item" onclick="resetToStep(1)">Головна</span>`;
+            let html = `<span class="breadcrumb-item" onclick="window.resetToStep(1)">Головна</span>`;
 
             if (state.step >= 2) {
-                html += ` <span class="breadcrumb-separator">❯</span> <span class="breadcrumb-item" onclick="resetToStep(2)">${state.selectedClass} клас</span>`;
+                html += ` <span class="breadcrumb-separator">❯</span> <span class="breadcrumb-item" onclick="window.resetToStep(2)">${state.selectedClass} клас</span>`;
             }
             if (state.step === 3) {
                 html += ` <span class="breadcrumb-separator">❯</span> <span class="breadcrumb-item">${state.selectedSubject}</span>`;
@@ -909,7 +1010,7 @@
             breadcrumbs.innerHTML = html;
         }
 
-        function resetToStep(step) {
+        window.resetToStep = function(step) {
             state.step = step;
             if (step === 1) {
                 state.selectedClass = null;
@@ -924,7 +1025,7 @@
 
         let currentOpenBook = null;
 
-        function openBookModal(bookId) {
+        window.openBookModal = function(bookId) {
             currentOpenBook = booksData.find(b => b.id === bookId);
             if (!currentOpenBook) return;
 
@@ -939,7 +1040,7 @@
             if (currentOpenBook.tasks && currentOpenBook.tasks.length > 0) {
                 currentOpenBook.tasks.forEach((task, index) => {
                     html += `
-                        <div class="task-btn" onclick="showSolution(${index}, this)">
+                        <div class="task-btn" onclick="window.showSolution(${index}, this)">
                             ${task.name}
                         </div>
                     `;
@@ -952,7 +1053,7 @@
             document.getElementById('solutionModal').classList.add('active');
         }
 
-        function showSolution(index, btnEl) {
+        window.showSolution = function(index, btnEl) {
             document.querySelectorAll('.task-btn').forEach(b => b.classList.remove('active'));
             if (btnEl) btnEl.classList.add('active');
 
@@ -972,14 +1073,21 @@
             solutionBox.style.display = 'block';
         }
 
-        function closeModal(id) {
+        window.closeModal = function(id) {
             document.getElementById(id).classList.remove('active');
         }
 
-        function openAdminPrompt() {
+        window.openAdminPrompt = function() {
+            if (isAdminLoggedIn) {
+                renderAdminBooks();
+                document.getElementById('adminModal').classList.add('active');
+                return;
+            }
             const pass = prompt('Введіть пароль від адмін-панелі:');
             if (pass === '12345678') {
+                isAdminLoggedIn = true;
                 renderAdminBooks();
+                renderView();
                 document.getElementById('adminModal').classList.add('active');
             } else if (pass !== null) {
                 alert('Невірний пароль!');
@@ -987,24 +1095,37 @@
         }
 
         let adminTaskCounter = 0;
-        function addAdminTaskRow(name = '', image = '') {
+        window.addAdminTaskRow = function(name = '', existingImage = '') {
             adminTaskCounter++;
             const container = document.getElementById('adminTasksContainer');
             const div = document.createElement('div');
             div.className = 'task-input-group';
             div.id = `adminTaskRow_${adminTaskCounter}`;
+            div.dataset.existingImage = existingImage;
 
             div.innerHTML = `
                 <input type="text" placeholder="№" value="${name}" class="task-name" style="width:70px;" required>
                 <input type="file" accept="image/*" class="task-file">
+                ${existingImage ? `<span title="Картинка завантажена" style="font-size:12px; color:green;">✓</span>` : ''}
                 <button type="button" onclick="this.parentElement.remove()" style="background:#ef4444; color:white; border:none; padding:0.3rem 0.6rem; border-radius:4px; cursor:pointer;">✕</button>
             `;
             container.appendChild(div);
         }
 
-        addAdminTaskRow('1');
-        addAdminTaskRow('2');
-        addAdminTaskRow('3');
+        // Заповнимо базовими полями при старті
+        window.resetAdminForm = function() {
+            document.getElementById('addBookForm').reset();
+            document.getElementById('editingBookId').value = '';
+            document.getElementById('adminModalTitle').innerText = '⚙️ Додати підручник';
+            document.getElementById('submitBookBtn').innerText = 'Зберегти підручник';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.getElementById('coverNotice').innerText = '';
+            document.getElementById('adminTasksContainer').innerHTML = '';
+            
+            window.addAdminTaskRow('1');
+            window.addAdminTaskRow('2');
+            window.addAdminTaskRow('3');
+        }
 
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
@@ -1019,6 +1140,7 @@
         document.getElementById('addBookForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const editingId = document.getElementById('editingBookId').value;
             const classNum = document.getElementById('classSelect').value;
             const subject = document.getElementById('subjectInput').value.trim();
             const title = document.getElementById('titleInput').value.trim();
@@ -1026,7 +1148,9 @@
             const unitType = document.getElementById('unitTypeSelect').value;
             const coverFile = document.getElementById('coverFileInput').files[0];
 
-            let coverBase64 = '';
+            let existingBook = editingId ? booksData.find(b => b.id === editingId) : null;
+            let coverBase64 = existingBook ? existingBook.cover : '';
+
             if (coverFile) {
                 coverBase64 = await fileToBase64(coverFile);
             }
@@ -1037,7 +1161,8 @@
             for (let row of taskRows) {
                 const name = row.querySelector('.task-name').value.trim();
                 const file = row.querySelector('.task-file').files[0];
-                let imgBase64 = '';
+                let imgBase64 = row.dataset.existingImage || '';
+
                 if (file) {
                     imgBase64 = await fileToBase64(file);
                 }
@@ -1046,8 +1171,7 @@
                 }
             }
 
-            const newBook = {
-                id: 'book_' + Date.now(),
+            const bookData = {
                 classNum,
                 subject,
                 title,
@@ -1057,19 +1181,31 @@
                 tasks
             };
 
-            booksData.push(newBook);
-            saveBooksData();
-
-            alert('Підручник збережено! Не забудьте натиснути "Завантажити books.json" та закинути його на GitHub!');
-            closeModal('adminModal');
-            renderView();
+            if (editingId) {
+                // Оновлюємо існуючий підручник у Firebase
+                update(ref(db, `books/${editingId}`), bookData)
+                    .then(() => {
+                        alert('Підручник успішно відредаговано!');
+                        window.resetAdminForm();
+                        renderAdminBooks();
+                    });
+            } else {
+                // Додаємо новий підручник у Firebase
+                const newBookRef = push(ref(db, 'books'));
+                set(newBookRef, bookData)
+                    .then(() => {
+                        alert('Новий підручник збережено в Firebase!');
+                        window.resetAdminForm();
+                        renderAdminBooks();
+                    });
+            }
         });
 
         function renderAdminBooks() {
             const container = document.getElementById('adminBooksList');
 
             if (booksData.length === 0) {
-                container.innerHTML = '<p style="color:gray;">Немає створених підручників</p>';
+                container.innerHTML = '<p style="color:gray;">Немає збережених підручників</p>';
                 return;
             }
 
@@ -1080,19 +1216,58 @@
                         <div>
                             <strong>${b.title}</strong> (${b.classNum} кл — ${b.subject})
                         </div>
-                        <button class="del-book-btn" onclick="deleteBook('${b.id}')">Видалити</button>
+                        <div class="admin-actions">
+                            <button class="edit-btn" onclick="window.editBook('${b.id}')">✏️</button>
+                            <button class="del-book-btn" onclick="window.deleteBook('${b.id}')">✕</button>
+                        </div>
                     </div>
                 `;
             });
             container.innerHTML = html;
         }
 
-        function deleteBook(id) {
-            if (confirm('Видалити цей підручник?')) {
-                booksData = booksData.filter(b => b.id !== id);
-                saveBooksData();
-                renderAdminBooks();
-                renderView();
+        window.editBook = function(id) {
+            const book = booksData.find(b => b.id === id);
+            if (!book) return;
+
+            document.getElementById('editingBookId').value = book.id;
+            document.getElementById('classSelect').value = book.classNum;
+            document.getElementById('subjectInput').value = book.subject;
+            document.getElementById('titleInput').value = book.title;
+            document.getElementById('authorInput').value = book.author;
+            document.getElementById('unitTypeSelect').value = book.unitType || 'Номер';
+
+            document.getElementById('adminModalTitle').innerText = '✏️ Редагувати підручник';
+            document.getElementById('submitBookBtn').innerText = 'Зберегти зміни';
+            document.getElementById('cancelEditBtn').style.display = 'block';
+
+            if (book.cover) {
+                document.getElementById('coverNotice').innerText = 'Обкладинка вже завантажена (виберіть файл, тільки якщо хочете замінити)';
+            } else {
+                document.getElementById('coverNotice').innerText = '';
+            }
+
+            const tasksContainer = document.getElementById('adminTasksContainer');
+            tasksContainer.innerHTML = '';
+
+            if (book.tasks && book.tasks.length > 0) {
+                book.tasks.forEach(t => {
+                    window.addAdminTaskRow(t.name, t.image);
+                });
+            } else {
+                window.addAdminTaskRow('1');
+            }
+
+            // Скроллимо адмінку вгору
+            document.querySelector('#adminModal .modal-body').scrollTop = 0;
+        }
+
+        window.deleteBook = function(id) {
+            if (confirm('Ви впевнені, що хочете видалити цей підручник?')) {
+                remove(ref(db, `books/${id}`))
+                    .then(() => {
+                        alert('Підручник видалено!');
+                    });
             }
         }
 
@@ -1104,6 +1279,7 @@
             });
         }
 
+        window.resetAdminForm();
         init();
     </script>
 </body>
