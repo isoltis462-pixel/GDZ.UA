@@ -243,10 +243,6 @@
             gap: 0.75rem;
         }
 
-        .subject-card-wrapper {
-            position: relative;
-        }
-
         .subject-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -259,11 +255,9 @@
             box-shadow: var(--shadow);
             transition: 0.2s;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 90px;
-            width: 100%;
         }
 
         .subject-card:active, .subject-card:hover {
@@ -468,7 +462,6 @@
         }
 
         .admin-pc-btn {
-            display: none;
             position: fixed;
             bottom: 15px;
             left: 15px;
@@ -483,6 +476,7 @@
             box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
             cursor: pointer;
             z-index: 999;
+            display: flex;
             align-items: center;
             justify-content: center;
             transition: transform 0.2s;
@@ -490,12 +484,6 @@
 
         .admin-pc-btn:hover {
             transform: scale(1.15);
-        }
-
-        @media (min-width: 1025px) {
-            .admin-pc-btn {
-                display: flex;
-            }
         }
 
         .form-group {
@@ -549,7 +537,7 @@
             align-items: center;
         }
 
-        .admin-book-item {
+        .admin-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -574,7 +562,7 @@
             font-weight: 600;
         }
 
-        .del-book-btn {
+        .del-btn {
             background: #ef4444;
             color: white;
             border: none;
@@ -584,16 +572,42 @@
             font-weight: 600;
         }
 
-        .btn-add-subject {
-            background: var(--surface);
-            border: 1px dashed var(--primary-light);
-            color: var(--primary-light);
+        .admin-section-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 1rem;
             border-radius: var(--radius-md);
-            padding: 0.75rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .admin-section-title {
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+        }
+
+        .add-subject-row {
+            display: flex;
+            gap: 0.5rem;
             margin-bottom: 1rem;
+        }
+
+        .add-subject-row select, .add-subject-row input {
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .add-subject-row button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
         }
     </style>
 </head>
@@ -627,12 +641,14 @@
         </div>
 
         <div id="viewContainer">
-            <!-- ДИНАМІЧНИЙ КОНТЕНТ -->
+            <!-- ДИНАМІЧНИЙ КОНТЕНТДЛЯ КОРИСТУВАЧІВ -->
         </div>
     </main>
 
+    <!-- КНОПКА ВХОДУ В АДМІНКУ -->
     <button class="admin-pc-btn" onclick="openAdminPrompt()" title="Адмін-панель">А</button>
 
+    <!-- МОДАЛЬНЕ ВІКНО ПЕРЕГЛЯДУ РОЗВ'ЯЗКІВ -->
     <div class="modal" id="solutionModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -650,14 +666,18 @@
         </div>
     </div>
 
+    <!-- ЄДИНА АДМІН-ПАНЕЛЬ (ВСІ ДІЇ ТІЛЬКИ ТУТ) -->
     <div class="modal" id="adminModal">
-        <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-content" style="max-width: 650px;">
             <div class="modal-header">
-                <div class="modal-title" id="adminModalTitle">⚙️ Додати підручник</div>
+                <div class="modal-title" id="adminModalTitle">⚙️ Адміністрування сайту</div>
                 <button class="close-btn" onclick="closeModal('adminModal')">✕</button>
             </div>
             <div class="modal-body">
+
+                <!-- ФОРМА ДОДАВАННЯ/РЕДАГУВАННЯ КНИГ -->
                 <form id="addBookForm">
+                    <h4 style="margin-bottom: 0.5rem;" id="formHeader">Додати / Редагувати підручник</h4>
                     <input type="hidden" id="editingBookId" value="">
                     
                     <div class="form-group">
@@ -720,9 +740,35 @@
                     <button type="button" class="btn-cancel-edit" id="cancelEditBtn" style="display:none;" onclick="resetAdminForm()">Скасувати редагування</button>
                 </form>
 
-                <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
-                <h4>Керування збереженими підручниками</h4>
-                <div id="adminBooksList" style="margin-top: 0.5rem;"></div>
+                <!-- СЕКЦІЯ КЕРУВАННЯ ПРЕДМЕТАМИ -->
+                <div class="admin-section-box">
+                    <div class="admin-section-title">📚 Керування предметами</div>
+                    <div class="add-subject-row">
+                        <select id="adminSubjectClassSelect" style="width: 100px;">
+                            <option value="1">1 кл</option>
+                            <option value="2">2 кл</option>
+                            <option value="3">3 кл</option>
+                            <option value="4">4 кл</option>
+                            <option value="5">5 кл</option>
+                            <option value="6">6 кл</option>
+                            <option value="7">7 кл</option>
+                            <option value="8" selected>8 кл</option>
+                            <option value="9">9 кл</option>
+                            <option value="10">10 кл</option>
+                            <option value="11">11 кл</option>
+                        </select>
+                        <input type="text" id="adminNewSubjectName" placeholder="Назва предмета..." style="flex:1;">
+                        <button type="button" onclick="window.adminAddSubject()">Додати</button>
+                    </div>
+                    <div id="adminSubjectsList"></div>
+                </div>
+
+                <!-- СЕКЦІЯ КЕРУВАННЯ ПІДРУЧНИКАМИ -->
+                <div class="admin-section-box">
+                    <div class="admin-section-title">📖 Список усіх підручників (редагування/видалення)</div>
+                    <div id="adminBooksList"></div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -732,7 +778,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
             authDomain: "keysbrawl-c4ae6.firebaseapp.com",
@@ -776,10 +821,8 @@
         const breadcrumbs = document.getElementById('breadcrumbs');
         const searchInput = document.getElementById('searchInput');
 
-        // Слухаємо базу даних Firebase у реальному часі
         function listenDatabase() {
-            const booksRef = ref(db, 'books');
-            onValue(booksRef, (snapshot) => {
+            onValue(ref(db, 'books'), (snapshot) => {
                 const data = snapshot.val();
                 booksData = [];
                 if (data) {
@@ -793,10 +836,12 @@
                 }
             });
 
-            const subjectsRef = ref(db, 'customSubjects');
-            onValue(subjectsRef, (snapshot) => {
+            onValue(ref(db, 'customSubjects'), (snapshot) => {
                 customSubjects = snapshot.val() || {};
                 renderView();
+                if (document.getElementById('adminModal').classList.contains('active')) {
+                    renderAdminSubjects();
+                }
             });
         }
 
@@ -804,6 +849,10 @@
             listenDatabase();
             setupSearch();
             setupTheme();
+            
+            document.getElementById('adminSubjectClassSelect').addEventListener('change', () => {
+                renderAdminSubjects();
+            });
         }
 
         function renderView() {
@@ -849,33 +898,19 @@
         function renderSubjects() {
             const defaultList = DEFAULT_SUBJECTS[state.selectedClass] || [];
             const customList = customSubjects[state.selectedClass] || [];
-            
-            // Об'єднуємо унікальні предмети
             const subjects = Array.from(new Set([...defaultList, ...customList]));
 
             let html = `
                 <div class="section-title">
                     Оберіть предмет (${state.selectedClass} клас)
                 </div>
+                <div class="grid-subjects">
             `;
-
-            if (isAdminLoggedIn) {
-                html += `
-                    <div class="btn-add-subject" onclick="window.addCustomSubjectPrompt()">
-                        + Додати новий предмет у ${state.selectedClass} клас
-                    </div>
-                `;
-            }
-
-            html += `<div class="grid-subjects">`;
             
             subjects.forEach(subj => {
                 html += `
-                    <div class="subject-card-wrapper">
-                        <div class="subject-card" onclick="window.selectSubject('${subj}')">
-                            ${subj}
-                        </div>
-                        ${isAdminLoggedIn ? `<button onclick="window.deleteSubjectPrompt('${subj}')" title="Видалити предмет" style="position:absolute; top:5px; right:5px; background:#ef4444; color:white; border:none; border-radius:50%; width:22px; height:22px; cursor:pointer; font-size:10px; font-weight:bold;">✕</button>` : ''}
+                    <div class="subject-card" onclick="window.selectSubject('${subj}')">
+                        ${subj}
                     </div>
                 `;
             });
@@ -890,37 +925,6 @@
             renderView();
         }
 
-        window.addCustomSubjectPrompt = function() {
-            const subjName = prompt(`Введіть назву нового предмета для ${state.selectedClass} класу:`);
-            if (subjName && subjName.trim() !== '') {
-                const cls = state.selectedClass;
-                const current = customSubjects[cls] || [];
-                if (!current.includes(subjName.trim())) {
-                    current.push(subjName.trim());
-                    set(ref(db, `customSubjects/${cls}`), current);
-                }
-            }
-        }
-
-        window.deleteSubjectPrompt = function(subj) {
-            if (confirm(`Видалити предмет "${subj}" з ${state.selectedClass} класу?`)) {
-                const cls = state.selectedClass;
-                
-                // Видаляємо з кастомних предметів
-                if (customSubjects[cls]) {
-                    const updated = customSubjects[cls].filter(s => s !== subj);
-                    set(ref(db, `customSubjects/${cls}`), updated);
-                }
-
-                // Видаляємо всі книги, що належать цьому предмету та класу
-                booksData.forEach(book => {
-                    if (Number(book.classNum) === Number(cls) && book.subject.toLowerCase() === subj.toLowerCase()) {
-                        remove(ref(db, `books/${book.id}`));
-                    }
-                });
-            }
-        }
-
         function renderBooks() {
             const filteredBooks = booksData.filter(b => 
                 Number(b.classNum) === Number(state.selectedClass) && 
@@ -930,11 +934,7 @@
             let html = `<div class="section-title">${state.selectedSubject} (${state.selectedClass} клас)</div>`;
 
             if (filteredBooks.length === 0) {
-                html += `
-                    <div class="empty-msg">
-                        Наразі немає доданих підручників для цього предмета.
-                    </div>
-                `;
+                html += `<div class="empty-msg">Наразі немає доданих підручників для цього предмета.</div>`;
             } else {
                 html += `<div class="grid-books">`;
                 filteredBooks.forEach(book => {
@@ -1080,6 +1080,7 @@
         window.openAdminPrompt = function() {
             if (isAdminLoggedIn) {
                 renderAdminBooks();
+                renderAdminSubjects();
                 document.getElementById('adminModal').classList.add('active');
                 return;
             }
@@ -1087,7 +1088,7 @@
             if (pass === '12345678') {
                 isAdminLoggedIn = true;
                 renderAdminBooks();
-                renderView();
+                renderAdminSubjects();
                 document.getElementById('adminModal').classList.add('active');
             } else if (pass !== null) {
                 alert('Невірний пароль!');
@@ -1106,17 +1107,16 @@
             div.innerHTML = `
                 <input type="text" placeholder="№" value="${name}" class="task-name" style="width:70px;" required>
                 <input type="file" accept="image/*" class="task-file">
-                ${existingImage ? `<span title="Картинка завантажена" style="font-size:12px; color:green;">✓</span>` : ''}
+                ${existingImage ? `<span title="Картинка є" style="font-size:12px; color:green;">✓</span>` : ''}
                 <button type="button" onclick="this.parentElement.remove()" style="background:#ef4444; color:white; border:none; padding:0.3rem 0.6rem; border-radius:4px; cursor:pointer;">✕</button>
             `;
             container.appendChild(div);
         }
 
-        // Заповнимо базовими полями при старті
         window.resetAdminForm = function() {
             document.getElementById('addBookForm').reset();
             document.getElementById('editingBookId').value = '';
-            document.getElementById('adminModalTitle').innerText = '⚙️ Додати підручник';
+            document.getElementById('formHeader').innerText = 'Додати підручник';
             document.getElementById('submitBookBtn').innerText = 'Зберегти підручник';
             document.getElementById('cancelEditBtn').style.display = 'none';
             document.getElementById('coverNotice').innerText = '';
@@ -1182,25 +1182,91 @@
             };
 
             if (editingId) {
-                // Оновлюємо існуючий підручник у Firebase
                 update(ref(db, `books/${editingId}`), bookData)
                     .then(() => {
-                        alert('Підручник успішно відредаговано!');
+                        alert('Підручник оновлено!');
                         window.resetAdminForm();
                         renderAdminBooks();
                     });
             } else {
-                // Додаємо новий підручник у Firebase
                 const newBookRef = push(ref(db, 'books'));
                 set(newBookRef, bookData)
                     .then(() => {
-                        alert('Новий підручник збережено в Firebase!');
+                        alert('Підручник збережено!');
                         window.resetAdminForm();
                         renderAdminBooks();
                     });
             }
         });
 
+        // КЕРУВАННЯ ПРЕДМЕТАМИ В АДМІНЦІ
+        function renderAdminSubjects() {
+            const cls = document.getElementById('adminSubjectClassSelect').value;
+            const container = document.getElementById('adminSubjectsList');
+
+            const defaultList = DEFAULT_SUBJECTS[cls] || [];
+            const customList = customSubjects[cls] || [];
+            const allSubjects = Array.from(new Set([...defaultList, ...customList]));
+
+            if (allSubjects.length === 0) {
+                container.innerHTML = '<p style="color:gray;">Немає предметів</p>';
+                return;
+            }
+
+            let html = '';
+            allSubjects.forEach(subj => {
+                const isCustom = customList.includes(subj);
+                html += `
+                    <div class="admin-item">
+                        <div>
+                            <strong>${subj}</strong> ${isCustom ? '<span style="font-size:10px; background:#3b82f6; color:white; padding:1px 4px; border-radius:3px;">доданий</span>' : ''}
+                        </div>
+                        <div class="admin-actions">
+                            <button class="del-btn" onclick="window.adminDeleteSubject('${cls}', '${subj}')">Видалити предмет</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        window.adminAddSubject = function() {
+            const cls = document.getElementById('adminSubjectClassSelect').value;
+            const nameInput = document.getElementById('adminNewSubjectName');
+            const subjName = nameInput.value.trim();
+
+            if (subjName !== '') {
+                const current = customSubjects[cls] || [];
+                if (!current.includes(subjName)) {
+                    current.push(subjName);
+                    set(ref(db, `customSubjects/${cls}`), current).then(() => {
+                        nameInput.value = '';
+                        renderAdminSubjects();
+                    });
+                }
+            }
+        }
+
+        window.adminDeleteSubject = function(cls, subj) {
+            if (confirm(`Видалити предмет "${subj}" для ${cls} класу та всі пов'язані підручники?`)) {
+                // Видаляємо з кастомних предметів
+                if (customSubjects[cls]) {
+                    const updated = customSubjects[cls].filter(s => s !== subj);
+                    set(ref(db, `customSubjects/${cls}`), updated);
+                }
+
+                // Видаляємо всі книги цього предмета
+                booksData.forEach(book => {
+                    if (Number(book.classNum) === Number(cls) && book.subject.toLowerCase() === subj.toLowerCase()) {
+                        remove(ref(db, `books/${book.id}`));
+                    }
+                });
+
+                renderAdminSubjects();
+            }
+        }
+
+        // КЕРУВАННЯ ПІДРУЧНИКАМИ В АДМІНЦІ
         function renderAdminBooks() {
             const container = document.getElementById('adminBooksList');
 
@@ -1212,13 +1278,13 @@
             let html = '';
             booksData.forEach(b => {
                 html += `
-                    <div class="admin-book-item">
+                    <div class="admin-item">
                         <div>
                             <strong>${b.title}</strong> (${b.classNum} кл — ${b.subject})
                         </div>
                         <div class="admin-actions">
-                            <button class="edit-btn" onclick="window.editBook('${b.id}')">✏️</button>
-                            <button class="del-book-btn" onclick="window.deleteBook('${b.id}')">✕</button>
+                            <button class="edit-btn" onclick="window.editBook('${b.id}')">✏️ Редагувати</button>
+                            <button class="del-btn" onclick="window.deleteBook('${b.id}')">✕ Видалити</button>
                         </div>
                     </div>
                 `;
@@ -1237,12 +1303,12 @@
             document.getElementById('authorInput').value = book.author;
             document.getElementById('unitTypeSelect').value = book.unitType || 'Номер';
 
-            document.getElementById('adminModalTitle').innerText = '✏️ Редагувати підручник';
+            document.getElementById('formHeader').innerText = '✏️ Редагувати підручник';
             document.getElementById('submitBookBtn').innerText = 'Зберегти зміни';
             document.getElementById('cancelEditBtn').style.display = 'block';
 
             if (book.cover) {
-                document.getElementById('coverNotice').innerText = 'Обкладинка вже завантажена (виберіть файл, тільки якщо хочете замінити)';
+                document.getElementById('coverNotice').innerText = 'Обкладинка вже є (завантажте новий файл для заміни)';
             } else {
                 document.getElementById('coverNotice').innerText = '';
             }
@@ -1258,16 +1324,12 @@
                 window.addAdminTaskRow('1');
             }
 
-            // Скроллимо адмінку вгору
             document.querySelector('#adminModal .modal-body').scrollTop = 0;
         }
 
         window.deleteBook = function(id) {
             if (confirm('Ви впевнені, що хочете видалити цей підручник?')) {
-                remove(ref(db, `books/${id}`))
-                    .then(() => {
-                        alert('Підручник видалено!');
-                    });
+                remove(ref(db, `books/${id}`));
             }
         }
 
