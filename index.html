@@ -1,6 +1,6 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
+<html lang="uk"><head><style>body {transition: opacity ease-in 0.2s; } 
+body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relative; } 
+</style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ГДЗ ОНЛАЙН — Готові домашні завдання</title>
@@ -122,6 +122,25 @@
             cursor: pointer;
             font-size: 1.1rem;
             transition: 0.2s;
+        }
+
+        .admin-nav-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .admin-nav-btn:hover {
+            background: #dc2626;
         }
 
         .search-section {
@@ -610,20 +629,42 @@
             font-weight: 700;
         }
     </style>
-</head>
+<style>
+        @font-face {
+            font-family: 'NotoSans_online_security'; 
+            src: url(chrome-extension://llbcnfanfmjhpedaedhbcnpgeepdnnok/assets/fonts/noto-sans-regular.woff);
+        }
+
+        @font-face {
+            font-family: 'NotoSans_medium_online_security'; 
+            src: url(chrome-extension://llbcnfanfmjhpedaedhbcnpgeepdnnok/assets/fonts/noto-sans-medium.ttf);
+        }
+
+        @font-face {
+            font-family: 'NotoSans_bold_online_security'; 
+            src: url(chrome-extension://llbcnfanfmjhpedaedhbcnpgeepdnnok/assets/fonts/noto-sans-bold.woff);
+        }
+
+        @font-face {
+            font-family: 'NotoSans_semibold_online_security'; 
+            src: url(chrome-extension://llbcnfanfmjhpedaedhbcnpgeepdnnok/assets/fonts/noto-sans-semibold.ttf);
+        }
+</style></head>
 <body>
 
     <header>
         <div class="header-container">
             <div class="logo-group" onclick="resetToStep(1)">
-                <img src="Знімок екрана 2026-09-18 140926.jpg" alt="ГДЗ ОНЛАЙН" class="avatar-img" onerror="this.src='https://via.placeholder.com/44?text=ГДЗ'">
+                <img src="https://via.placeholder.com/44?text=ГДЗ" alt="ГДЗ ОНЛАЙН" class="avatar-img" onerror="this.src='https://via.placeholder.com/44?text=ГДЗ'">
                 <div class="logo-text">
                     <span class="logo-title">ГДЗ ОНЛАЙН</span>
                     <span class="logo-subtitle">Готові домашні завдання</span>
                 </div>
             </div>
             <div class="header-actions">
-                <button class="icon-btn" id="themeToggle" title="Змінити тему">🌙</button>
+                <!-- ЯВНА КНОПКА АДМІН-ПАНЕЛІ У ШАПЦІ -->
+                <button class="admin-nav-btn" onclick="openAdminPrompt()">⚙️ Адмінка</button>
+                <button class="icon-btn" id="themeToggle" title="Змінити тему" fdprocessedid="g1524">🌙</button>
             </div>
         </div>
     </header>
@@ -631,29 +672,83 @@
     <div class="search-section">
         <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" class="search-input" placeholder="Пошук за предметом або автором...">
+            <input type="text" id="searchInput" class="search-input" placeholder="Пошук за предметом або автором..." fdprocessedid="w6pp">
         </div>
     </div>
 
     <main>
-        <div class="breadcrumbs" id="breadcrumbs">
-            <span class="breadcrumb-item" onclick="resetToStep(1)">Головна (Класи)</span>
-        </div>
+        <div class="breadcrumbs" id="breadcrumbs"><span class="breadcrumb-item" onclick="window.resetToStep(1)">Головна</span></div>
 
         <div id="viewContainer">
-            <!-- ДИНАМІЧНИЙ КОНТЕНТДЛЯ КОРИСТУВАЧІВ -->
-        </div>
+                <div class="section-title">Оберіть клас</div>
+                <div class="grid-classes">
+            
+                    <div class="class-card" onclick="window.selectClass(1)">
+                        1 клас
+                        <span>підручники</span>
+                    </div>
+                
+                    <div class="class-card" onclick="window.selectClass(2)">
+                        2 клас
+                        <span>підручники</span>
+                    </div>
+                
+                    <div class="class-card" onclick="window.selectClass(3)">
+                        3 клас
+                        <span>підручники</span>
+                    </div>
+                
+                    <div class="class-card" onclick="window.selectClass(4)">
+                        4 клас
+                        <span>підручники</span>
+                    </div>
+                
+                    <div class="class-card" onclick="window.selectClass(5)">
+                        5 клас
+                        <span>підручники</span>
+                    </div>
+                
+                    <div class="class-card" onclick="window.selectClass(6)">
+                        6 клас
+                        <span>підручники</span>
+                    </div>
+                
+                    <div class="class-card" onclick="window.selectClass(7)">
+                        7 клас
+                        <span>підручники</span>
+                    </div>
+                
+                    <div class="class-card" onclick="window.selectClass(8)">
+                        8 клас
+                        <span>підручники</span>
+                    </div>
+                
+                    <div class="class-card" onclick="window.selectClass(9)">
+                        9 клас
+                        <span>підручники</span>
+                    </div>
+                
+                    <div class="class-card" onclick="window.selectClass(10)">
+                        10 клас
+                        <span>підручники</span>
+                    </div>
+                
+                    <div class="class-card" onclick="window.selectClass(11)">
+                        11 клас
+                        <span>підручники</span>
+                    </div>
+                </div></div>
     </main>
 
     <!-- КНОПКА ВХОДУ В АДМІНКУ -->
-    <button class="admin-pc-btn" onclick="openAdminPrompt()" title="Адмін-панель">А</button>
+    <button class="admin-pc-btn" onclick="openAdminPrompt()" title="Адмін-панель" fdprocessedid="w7kx9h">А</button>
 
     <!-- МОДАЛЬНЕ ВІКНО ПЕРЕГЛЯДУ РОЗВ'ЯЗКІВ -->
     <div class="modal" id="solutionModal">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title" id="modalBookTitle">Підручник</div>
-                <button class="close-btn" onclick="closeModal('solutionModal')">✕</button>
+                <button class="close-btn" onclick="closeModal('solutionModal')" fdprocessedid="xc9ws8">✕</button>
             </div>
             <div class="modal-body">
                 <div class="section-title" id="unitTypeTitle">Оберіть завдання</div>
@@ -671,18 +766,18 @@
         <div class="modal-content" style="max-width: 650px;">
             <div class="modal-header">
                 <div class="modal-title" id="adminModalTitle">⚙️ Адміністрування сайту</div>
-                <button class="close-btn" onclick="closeModal('adminModal')">✕</button>
+                <button class="close-btn" onclick="closeModal('adminModal')" fdprocessedid="x2yp5w">✕</button>
             </div>
             <div class="modal-body">
 
                 <!-- ФОРМА ДОДАВАННЯ/РЕДАГУВАННЯ КНИГ -->
                 <form id="addBookForm">
-                    <h4 style="margin-bottom: 0.5rem;" id="formHeader">Додати / Редагувати підручник</h4>
+                    <h4 style="margin-bottom: 0.5rem;" id="formHeader">Додати підручник</h4>
                     <input type="hidden" id="editingBookId" value="">
                     
                     <div class="form-group">
                         <label>Клас:</label>
-                        <select id="classSelect" required>
+                        <select id="classSelect" required="" fdprocessedid="t0xhsg">
                             <option value="1">1 клас</option>
                             <option value="2">2 клас</option>
                             <option value="3">3 клас</option>
@@ -699,17 +794,17 @@
 
                     <div class="form-group">
                         <label>Предмет:</label>
-                        <input type="text" id="subjectInput" placeholder="Математика, Алгебра..." required>
+                        <input type="text" id="subjectInput" placeholder="Математика, Алгебра..." required="" fdprocessedid="o8xzx7">
                     </div>
 
                     <div class="form-group">
                         <label>Назва підручника:</label>
-                        <input type="text" id="titleInput" placeholder="напр. Алгебра 8 клас" required>
+                        <input type="text" id="titleInput" placeholder="напр. Алгебра 8 клас" required="" fdprocessedid="b79d2t">
                     </div>
 
                     <div class="form-group">
                         <label>Автор(и):</label>
-                        <input type="text" id="authorInput" placeholder="А.Г. Мерзляк" required>
+                        <input type="text" id="authorInput" placeholder="А.Г. Мерзляк" required="" fdprocessedid="t3fzk">
                     </div>
 
                     <div class="form-group">
@@ -720,7 +815,7 @@
 
                     <div class="form-group">
                         <label>Тип завдань:</label>
-                        <select id="unitTypeSelect">
+                        <select id="unitTypeSelect" fdprocessedid="4w6c4e">
                             <option value="Номер">Номери (№)</option>
                             <option value="Вправа">Вправи</option>
                             <option value="Юніт">Юніти (Unit)</option>
@@ -732,11 +827,26 @@
 
                     <div class="form-group">
                         <label>Вправи та фото розв'язків:</label>
-                        <div id="adminTasksContainer"></div>
-                        <button type="button" onclick="addAdminTaskRow()" style="margin-top:0.4rem; padding:0.4rem 0.8rem; cursor:pointer; border-radius: 6px;">+ Додати вправу</button>
+                        <div id="adminTasksContainer"><div class="task-input-group" id="adminTaskRow_1" data-existing-image="">
+                <input type="text" placeholder="№" value="1" class="task-name" style="width:70px;" required="" fdprocessedid="nxkvu">
+                <input type="file" accept="image/*" class="task-file">
+                
+                <button type="button" onclick="this.parentElement.remove()" style="background:#ef4444; color:white; border:none; padding:0.3rem 0.6rem; border-radius:4px; cursor:pointer;" fdprocessedid="cbwdme">✕</button>
+            </div><div class="task-input-group" id="adminTaskRow_2" data-existing-image="">
+                <input type="text" placeholder="№" value="2" class="task-name" style="width:70px;" required="" fdprocessedid="tsl16h">
+                <input type="file" accept="image/*" class="task-file">
+                
+                <button type="button" onclick="this.parentElement.remove()" style="background:#ef4444; color:white; border:none; padding:0.3rem 0.6rem; border-radius:4px; cursor:pointer;" fdprocessedid="k0e0g">✕</button>
+            </div><div class="task-input-group" id="adminTaskRow_3" data-existing-image="">
+                <input type="text" placeholder="№" value="3" class="task-name" style="width:70px;" required="" fdprocessedid="x1nts8">
+                <input type="file" accept="image/*" class="task-file">
+                
+                <button type="button" onclick="this.parentElement.remove()" style="background:#ef4444; color:white; border:none; padding:0.3rem 0.6rem; border-radius:4px; cursor:pointer;" fdprocessedid="yt4a2">✕</button>
+            </div></div>
+                        <button type="button" onclick="addAdminTaskRow()" style="margin-top:0.4rem; padding:0.4rem 0.8rem; cursor:pointer; border-radius: 6px;" fdprocessedid="2blz5oh">+ Додати вправу</button>
                     </div>
 
-                    <button type="submit" class="btn-submit" id="submitBookBtn">Зберегти підручник</button>
+                    <button type="submit" class="btn-submit" id="submitBookBtn" fdprocessedid="ox2mz">Зберегти підручник</button>
                     <button type="button" class="btn-cancel-edit" id="cancelEditBtn" style="display:none;" onclick="resetAdminForm()">Скасувати редагування</button>
                 </form>
 
@@ -744,7 +854,7 @@
                 <div class="admin-section-box">
                     <div class="admin-section-title">📚 Керування предметами</div>
                     <div class="add-subject-row">
-                        <select id="adminSubjectClassSelect" style="width: 100px;">
+                        <select id="adminSubjectClassSelect" style="width: 100px;" fdprocessedid="6puqtl">
                             <option value="1">1 кл</option>
                             <option value="2">2 кл</option>
                             <option value="3">3 кл</option>
@@ -752,21 +862,93 @@
                             <option value="5">5 кл</option>
                             <option value="6">6 кл</option>
                             <option value="7">7 кл</option>
-                            <option value="8" selected>8 кл</option>
+                            <option value="8" selected="">8 кл</option>
                             <option value="9">9 кл</option>
                             <option value="10">10 кл</option>
                             <option value="11">11 кл</option>
                         </select>
-                        <input type="text" id="adminNewSubjectName" placeholder="Назва предмета..." style="flex:1;">
-                        <button type="button" onclick="window.adminAddSubject()">Додати</button>
+                        <input type="text" id="adminNewSubjectName" placeholder="Назва предмета..." style="flex:1;" fdprocessedid="ku3mw8">
+                        <button type="button" onclick="window.adminAddSubject()" fdprocessedid="9snek8">Додати</button>
                     </div>
-                    <div id="adminSubjectsList"></div>
+                    <div id="adminSubjectsList">
+                    <div class="admin-item">
+                        <div>
+                            <strong>Алгебра</strong> 
+                        </div>
+                        <div class="admin-actions">
+                            <button class="del-btn" onclick="window.adminDeleteSubject('9', 'Алгебра')" fdprocessedid="uctfn">Видалити предмет</button>
+                        </div>
+                    </div>
+                
+                    <div class="admin-item">
+                        <div>
+                            <strong>Геометрія</strong> 
+                        </div>
+                        <div class="admin-actions">
+                            <button class="del-btn" onclick="window.adminDeleteSubject('9', 'Геометрія')" fdprocessedid="0xv3o">Видалити предмет</button>
+                        </div>
+                    </div>
+                
+                    <div class="admin-item">
+                        <div>
+                            <strong>Фізика</strong> 
+                        </div>
+                        <div class="admin-actions">
+                            <button class="del-btn" onclick="window.adminDeleteSubject('9', 'Фізика')" fdprocessedid="cphlqrop">Видалити предмет</button>
+                        </div>
+                    </div>
+                
+                    <div class="admin-item">
+                        <div>
+                            <strong>Хімія</strong> 
+                        </div>
+                        <div class="admin-actions">
+                            <button class="del-btn" onclick="window.adminDeleteSubject('9', 'Хімія')" fdprocessedid="ho54e">Видалити предмет</button>
+                        </div>
+                    </div>
+                
+                    <div class="admin-item">
+                        <div>
+                            <strong>Біологія</strong> 
+                        </div>
+                        <div class="admin-actions">
+                            <button class="del-btn" onclick="window.adminDeleteSubject('9', 'Біологія')" fdprocessedid="qvx3td">Видалити предмет</button>
+                        </div>
+                    </div>
+                
+                    <div class="admin-item">
+                        <div>
+                            <strong>Українська мова</strong> 
+                        </div>
+                        <div class="admin-actions">
+                            <button class="del-btn" onclick="window.adminDeleteSubject('9', 'Українська мова')" fdprocessedid="0o3e6">Видалити предмет</button>
+                        </div>
+                    </div>
+                
+                    <div class="admin-item">
+                        <div>
+                            <strong>Англійська мова</strong> 
+                        </div>
+                        <div class="admin-actions">
+                            <button class="del-btn" onclick="window.adminDeleteSubject('9', 'Англійська мова')" fdprocessedid="b0x20t">Видалити предмет</button>
+                        </div>
+                    </div>
+                
+                    <div class="admin-item">
+                        <div>
+                            <strong>Правознавство</strong> 
+                        </div>
+                        <div class="admin-actions">
+                            <button class="del-btn" onclick="window.adminDeleteSubject('9', 'Правознавство')" fdprocessedid="86mmyq">Видалити предмет</button>
+                        </div>
+                    </div>
+                </div>
                 </div>
 
                 <!-- СЕКЦІЯ КЕРУВАННЯ ПІДРУЧНИКАМИ -->
                 <div class="admin-section-box">
                     <div class="admin-section-title">📖 Список усіх підручників (редагування/видалення)</div>
-                    <div id="adminBooksList"></div>
+                    <div id="adminBooksList"><p style="color:gray;">Немає збережених підручників</p></div>
                 </div>
 
             </div>
@@ -1344,5 +1526,6 @@
         window.resetAdminForm();
         init();
     </script>
-</body>
-</html>
+
+
+<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span></body></html>
