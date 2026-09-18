@@ -1,93 +1,91 @@
-// Стан класів та вправ
-let availableClasses = JSON.parse(localStorage.getItem('availableClasses')) || {
+// Збереження даних у локальному сховищі браузера
+let activeClasses = JSON.parse(localStorage.getItem('activeClasses')) || {
     1: false, 2: false, 3: false, 4: false, 5: false,
     6: false, 7: false, 8: false, 9: true, 10: false, 11: false
 };
 
 let exercises = JSON.parse(localStorage.getItem('exercises')) || [];
-let selectedClass = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('classesGrid')) renderClassesGrid();
-    if (document.getElementById('adminClassToggles')) renderAdminControls();
-    if (document.getElementById('classSelect')) renderClassSelectOptions();
-    if (document.getElementById('adminExercisesList')) renderAdminExercisesList();
+    if (document.getElementById('classesGrid')) renderClasses();
+    if (document.getElementById('adminClassToggles')) renderAdminToggles();
+    if (document.getElementById('classSelect')) renderAdminSelect();
+    if (document.getElementById('adminExercisesList')) renderAdminList();
 });
 
-// РЕНДЕР КЛАСІВ
-function renderClassesGrid() {
+// Рендер кнопок класів 1-11
+function renderClasses() {
     const grid = document.getElementById('classesGrid');
     grid.innerHTML = '';
 
     for (let i = 1; i <= 11; i++) {
         const btn = document.createElement('button');
-        btn.className = `class-btn ${!availableClasses[i] ? 'disabled' : ''}`;
-        btn.innerText = `${i} кл.`;
-        btn.onclick = () => handleClassClick(i);
+        btn.className = 'class-btn';
+        btn.innerText = `${i} клас`;
+        btn.onclick = () => openClass(i);
         grid.appendChild(btn);
     }
 }
 
-function handleClassClick(classNum) {
-    if (availableClasses[classNum]) {
-        selectedClass = classNum;
-        document.getElementById('contentSection').style.display = 'block';
-        document.getElementById('selectedClassTitle').innerText = `Вправи для ${classNum} класу`;
-        renderExercisesList(classNum);
+// Натискання на кнопку класу
+function openClass(classNum) {
+    if (activeClasses[classNum]) {
+        // Якщо клас увімкнено в адмінці
+        const container = document.getElementById('exercisesContainer');
+        const list = document.getElementById('exercisesList');
+        document.getElementById('selectedClassHeader').innerText = `Вправи для ${classNum} класу`;
+        
+        const filtered = exercises.filter(e => e.classNum === classNum);
+        
+        if (filtered.length === 0) {
+            list.innerHTML = '<p style="margin-top:15px; color:#aaa;">Вправ для цього класу поки немає.</p>';
+        } else {
+            list.innerHTML = filtered.map(item => `
+                <div class="exercise-item">
+                    <h3>${item.title}</h3>
+                    <img src="${item.imagePath}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/500x200?text=Зображення+не+знайдено';">
+                </div>
+            `).join('');
+        }
+        
+        container.style.display = 'block';
     } else {
-        showModal(`Увага! ${classNum} клас тимчасово недоступний.`);
+        // Якщо клас закритий — показуємо модальне вікно
+        const modal = document.getElementById('modalOverlay');
+        const modalText = document.getElementById('modalText');
+        modalText.innerText = `Цей клас тимчасово недоступний. Зараз працює лише 9 клас, матеріали для інших класів додаються!`;
+        modal.style.display = 'flex';
     }
 }
 
-function renderExercisesList(classNum) {
-    const container = document.getElementById('exercisesList');
-    const filtered = exercises.filter(e => e.classNum === classNum);
-
-    if (filtered.length === 0) {
-        container.innerHTML = '<p class="empty-msg">Список вправ порожній. Вони будуть додані згодом.</p>';
-        return;
-    }
-
-    container.innerHTML = filtered.map(item => `
-        <div class="exercise-card">
-            <h4>${item.title}</h4>
-            <img src="${item.imagePath}" alt="${item.title}" onerror="this.onerror=null; this.src='https://via.placeholder.com/600x200?text=Зображення+не+знайдено';">
-        </div>
-    `).join('');
-}
-
-// МОДАЛЬНЕ ВІКНО
-function showModal(message) {
-    document.getElementById('modalMessage').innerText = message;
-    document.getElementById('classModal').style.display = 'flex';
-}
-
+// ФУНКЦІЯ ЗАКРИТТЯ МОДАЛЬНОГО ВІКНА (Кнопка "Зрозуміло")
 function closeModal() {
-    document.getElementById('classModal').style.display = 'none';
+    const modal = document.getElementById('modalOverlay');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
-// АДМІНКА
-function renderAdminControls() {
+// --- АДМІНІСТРУВАННЯ ---
+
+function renderAdminToggles() {
     const container = document.getElementById('adminClassToggles');
     container.innerHTML = '';
-
     for (let i = 1; i <= 11; i++) {
-        const item = document.createElement('div');
-        item.className = 'toggle-item';
-        item.innerHTML = `
-            <input type="checkbox" id="toggle-${i}" ${availableClasses[i] ? 'checked' : ''} onchange="toggleClassAccess(${i}, this.checked)">
-            <label for="toggle-${i}">${i} кл.</label>
+        container.innerHTML += `
+            <label class="toggle-label">
+                <input type="checkbox" ${activeClasses[i] ? 'checked' : ''} onchange="toggleAccess(${i}, this.checked)"> ${i} клас
+            </label>
         `;
-        container.appendChild(item);
     }
 }
 
-function toggleClassAccess(classNum, isChecked) {
-    availableClasses[classNum] = isChecked;
-    localStorage.setItem('availableClasses', JSON.stringify(availableClasses));
+function toggleAccess(classNum, isChecked) {
+    activeClasses[classNum] = isChecked;
+    localStorage.setItem('activeClasses', JSON.stringify(activeClasses));
 }
 
-function renderClassSelectOptions() {
+function renderAdminSelect() {
     const select = document.getElementById('classSelect');
     select.innerHTML = '';
     for (let i = 1; i <= 11; i++) {
@@ -95,72 +93,68 @@ function renderClassSelectOptions() {
     }
 }
 
-function handleFormSubmit(e) {
+function saveExercise(e) {
     e.preventDefault();
-    
-    const editIndex = parseInt(document.getElementById('editIndex').value);
+    const index = parseInt(document.getElementById('editIndex').value);
     const classNum = parseInt(document.getElementById('classSelect').value);
     const title = document.getElementById('exerciseTitle').value;
     const imagePath = document.getElementById('imagePath').value;
 
-    const exerciseData = { classNum, title, imagePath };
+    const data = { classNum, title, imagePath };
 
-    if (editIndex === -1) {
-        exercises.push(exerciseData);
+    if (index === -1) {
+        exercises.push(data);
     } else {
-        exercises[editIndex] = exerciseData;
+        exercises[index] = data;
     }
 
     localStorage.setItem('exercises', JSON.stringify(exercises));
     resetForm();
-    renderAdminExercisesList();
+    renderAdminList();
 }
 
-function renderAdminExercisesList() {
+function renderAdminList() {
     const container = document.getElementById('adminExercisesList');
     if (exercises.length === 0) {
         container.innerHTML = '<p>Немає доданих вправ.</p>';
         return;
     }
 
-    container.innerHTML = exercises.map((item, index) => `
-        <div class="admin-exercise-item">
+    container.innerHTML = exercises.map((item, idx) => `
+        <div class="admin-ex-row">
+            <div><strong>[${item.classNum} кл]</strong> ${item.title}</div>
             <div>
-                <strong>[${item.classNum} клас]</strong> ${item.title}
-                <br><small style="color:#666">${item.imagePath}</small>
-            </div>
-            <div>
-                <button class="btn btn-secondary" onclick="editExercise(${index})">Редагувати</button>
-                <button class="btn btn-danger" onclick="deleteExercise(${index})">Видалити</button>
+                <button class="btn-edit" onclick="editEx(${idx})">✏️</button>
+                <button class="btn-del" onclick="deleteEx(${idx})">🗑️</button>
             </div>
         </div>
     `).join('');
 }
 
-function editExercise(index) {
-    const item = exercises[index];
-    document.getElementById('editIndex').value = index;
+function editEx(idx) {
+    const item = exercises[idx];
+    document.getElementById('editIndex').value = idx;
     document.getElementById('classSelect').value = item.classNum;
     document.getElementById('exerciseTitle').value = item.title;
     document.getElementById('imagePath').value = item.imagePath;
 
-    document.getElementById('formTitle').innerText = 'Редагувати вправу';
-    document.getElementById('saveBtn').innerText = 'Оновити вправу';
-    document.getElementById('cancelEditBtn').style.display = 'inline-block';
+    document.getElementById('formTitle').innerText = '2. Редагувати вправу';
+    document.getElementById('saveBtn').innerText = 'Оновити';
+    document.getElementById('cancelBtn').style.display = 'inline-block';
 }
 
-function deleteExercise(index) {
-    if (confirm('Ви дійсно хочете видалити цю вправу?')) {
-        exercises.splice(index, 1);
+function deleteEx(idx) {
+    if (confirm('Видалити цю вправу?')) {
+        exercises.splice(idx, 1);
         localStorage.setItem('exercises', JSON.stringify(exercises));
-        renderAdminExercisesList();
+        renderAdminList();
     }
 }
 
 function resetForm() {
     document.getElementById('editIndex').value = -1;
     document.getElementById('exerciseForm').reset();
-    document.getElementById('formTitle').innerText = 'Додати вправу';
-    document.getElementById('saveBtn').innerText = 'Зберегти вправу';
-    document.getElementById('cancelEditBtn').style.display = 'none';
+    document.getElementById('formTitle').innerText = '2. Додати / Редагувати вправу';
+    document.getElementById('saveBtn').innerText = 'Зберегти';
+    document.getElementById('cancelBtn').style.display = 'none';
 }
