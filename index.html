@@ -1,84 +1,381 @@
 <!DOCTYPE html>
-<html lang="uk" class="dark">
+<html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ГДЗ Онлайн — Готові Домашні Завдання</title>
-
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              800: '#3730a3',
-              900: '#312e81',
-              950: '#1e1b4b'
-            }
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
+  
   <style>
-    /* Custom Scrollbar & Utility Styles */
     body {
       font-family: 'Inter', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      -webkit-tap-highlight-color: transparent;
     }
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+
+    /* Стилі для пошуку на телефоні */
+    .mobile-search-box {
+      width: 100% !important;
+      padding: 14px 18px 14px 48px !important;
+      font-size: 16px !important; /* Упереджує зум на iOS */
+      border-radius: 16px !important;
     }
-    ::-webkit-scrollbar-track {
-      background: #0f172a;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #475569;
-    }
+
     .glass-panel {
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(30, 41, 59, 0.7);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .glass-card {
-      background: rgba(30, 41, 59, 0.6);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      transition: all 0.25s ease-in-out;
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
-    .glass-card:hover {
-      border-color: rgba(99, 102, 241, 0.4);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(99, 102, 241, 0.2);
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #3b82f6;
+      border-radius: 3px;
+    }
+
+    .active-tab {
+      background-color: #2563eb !important;
+      color: #ffffff !important;
+    }
+
+    .img-zoom-container {
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+    .img-zoom-container img {
+      transition: transform 0.3s ease;
+    }
+    .img-zoom-container.zoomed img {
+      transform: scale(2.2);
+      cursor: zoom-out;
     }
   </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-blue-500 selection:text-white">
 
+  <!-- ШАПКА / HEADER -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      
+      <!-- Логотип -->
+      <a href="#" onclick="showPortal()" class="flex items-center gap-2.5 group shrink-0">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-105 transition">
+          <i class="fa-solid font-bold text-white text-lg">ГДЗ</i>
+        </div>
+        <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-blue-400">
+          Онлайн
+        </span>
+      </a>
+
+      <!-- Повідомлення про зв'язок з Firebase -->
+      <div id="db-status" class="hidden sm:flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Firebase Живий зв'язок</span>
+      </div>
+
+      <!-- Кнопки справа -->
+      <div class="flex items-center gap-2">
+        <!-- Непомітна кнопка Адмінки -->
+        <button onclick="promptAdminLogin()" title="Панель керування" class="p-2 text-slate-500 hover:text-slate-300 transition rounded-lg hover:bg-slate-800/50 text-sm">
+          <i class="fa-solid fa-lock"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ГОЛОВНИЙ КОНТЕНТ (УЧНІВСЬКИЙ ПОРТАЛ) -->
+  <main id="portal-view" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-8">
+    
+    <!-- СЕКЦІЯ ПОШУКУ (ОПТИМІЗОВАНА ДЛЯ ТЕЛЕФОНІВ) -->
+    <section class="text-center py-4 sm:py-8">
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight">
+        Знайди розв'язок за 2 секунди
+      </h1>
+      <p class="text-slate-400 text-sm sm:text-base max-w-xl mx-auto mb-6">
+        Готові домашні завдання з 1 по 11 клас
+      </p>
+
+      <!-- ПОШУКОВИЙ БЛОК ДЛЯ МOБIЛКИ ТА ПК -->
+      <div class="max-w-2xl mx-auto relative px-1">
+        <div class="relative flex items-center">
+          <i class="fa-solid fa-magnifying-glass absolute left-4 text-slate-400 text-lg pointer-events-none"></i>
+          <input 
+            type="text" 
+            id="main-search-input"
+            oninput="handleSearch()"
+            placeholder="Шукай підручник, авторів або клас..." 
+            class="mobile-search-box w-full bg-slate-800/90 text-white placeholder-slate-400 border border-slate-700/80 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 outline-none transition shadow-2xl"
+          >
+          <button id="search-clear-btn" onclick="clearSearch()" class="hidden absolute right-4 text-slate-400 hover:text-white p-1">
+            <i class="fa-solid fa-circle-xmark text-lg"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ФІЛЬТР ПО КЛАСАХ (1 - 11) -->
+    <section>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-graduation-cap text-blue-400"></i> Обери клас:
+        </h2>
+        <button id="reset-class-btn" onclick="filterByClass(null)" class="hidden text-xs text-blue-400 hover:underline">
+          Показати всі
+        </button>
+      </div>
+      
+      <!-- Горизонтальний скролл классів для телефону -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-3 custom-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+        <button onclick="filterByClass(null)" id="class-btn-all" class="class-filter-btn shrink-0 px-4 py-2 rounded-xl text-sm font-semibold bg-blue-600 text-white shadow-lg shadow-blue-600/20">
+          Усі
+        </button>
+        <!-- Кнопки 1 - 11 генерація JS -->
+        <script>
+          for(let i=1; i<=11; i++) {
+            document.write(`
+              <button onclick="filterByClass(${i})" id="class-btn-${i}" class="class-filter-btn shrink-0 px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/60 transition">
+                ${i} клас
+              </button>
+            `);
+          }
+        </script>
+      </div>
+    </section>
+
+    <!-- СПИСОК ПІДРУЧНИКІВ (КАТАЛОГ) -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 id="catalog-title" class="text-lg sm:text-xl font-bold text-white">
+          Усі підручники
+        </h2>
+        <span id="books-count" class="text-xs sm:text-sm text-slate-400">Завантаження...</span>
+      </div>
+
+      <!-- Сітка підручників -->
+      <div id="books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
+        <!-- Динамічно заповнюється з Firebase -->
+      </div>
+
+      <!-- Порожній стан -->
+      <div id="empty-state" class="hidden text-center py-12 px-4 glass-panel rounded-2xl">
+        <i class="fa-solid fa-book-open text-4xl text-slate-600 mb-3"></i>
+        <p class="text-slate-300 font-medium">Підручників не знайдено</p>
+        <p class="text-slate-500 text-sm mt-1">Спробуй змінити параметри пошуку або обрати інший клас.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ПАНЕЛЬ АДМІНІСТРАТОРА (ADMIN PANEL) -->
+  <div id="admin-view" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="glass-panel rounded-2xl border border-slate-700/80 p-4 sm:p-6">
+      
+      <!-- Шапка адмінки -->
+      <div class="flex flex-wrap items-center justify-between gap-4 pb-4 mb-6 border-b border-slate-700">
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-blue-400"></i> Панель Керування ГДЗ
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-400">Редагування, додавання книг та розв'язків у Firebase</p>
+        </div>
+        <button onclick="showPortal()" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition">
+          <i class="fa-solid fa-arrow-left mr-1"></i> Повернутися на сайт
+        </button>
+      </div>
+
+      <!-- Перемикач Вкладок Адмінки -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6 custom-scrollbar border-b border-slate-800">
+        <button onclick="switchAdminTab('tab-add-book')" id="btn-tab-add-book" class="admin-tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white shrink-0">
+          <i class="fa-solid fa-plus-circle mr-1.5"></i> Додати підручник
+        </button>
+        <button onclick="switchAdminTab('tab-manage-books')" id="btn-tab-manage-books" class="admin-tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-800 text-slate-300 hover:text-white shrink-0">
+          <i class="fa-solid fa-book mr-1.5"></i> Керування книгами
+        </button>
+        <button onclick="switchAdminTab('tab-add-exercise')" id="btn-tab-add-exercise" class="admin-tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-800 text-slate-300 hover:text-white shrink-0">
+          <i class="fa-solid fa-file-circle-plus mr-1.5"></i> Додати / Згенерувати вправи
+        </button>
+      </div>
+
+      <!-- Вкладка 1: Додавання Підручника -->
+      <div id="tab-add-book" class="admin-tab-content space-y-4 max-w-2xl">
+        <h3 class="text-lg font-bold text-white">Новий підручник</h3>
+        <form onsubmit="handleAddBook(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Назва підручника</label>
+              <input type="text" id="book-title" required placeholder="напр. Математика" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Автор(и)</label>
+              <input type="text" id="book-author" required placeholder="напр. Тарасенкова Н. А." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Клас (1-11)</label>
+              <select id="book-grade" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none">
+                <script>
+                  for(let i=1; i<=11; i++) document.write(`<option value="${i}">${i} клас</option>`);
+                </script>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Предмет</label>
+              <input type="text" id="book-subject" required placeholder="Математика, Фізика..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Тип структури</label>
+              <select id="book-structure" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none">
+                <option value="Вправи">Вправи (№1, №2)</option>
+                <option value="Сторінки">Сторінки (ст. 10)</option>
+                <option value="Units">Units (Unit 1)</option>
+                <option value="Параграфи">Параграфи (§1, §2)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">URL обкладинки (або фото)</label>
+            <input type="url" id="book-cover-url" placeholder="https://..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none">
+          </div>
+
+          <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition">
+            Зберегти підручник у Firebase
+          </button>
+        </form>
+      </div>
+
+      <!-- Вкладка 2: Керування Книгами -->
+      <div id="tab-manage-books" class="admin-tab-content hidden space-y-4">
+        <h3 class="text-lg font-bold text-white">Усі підручники в базі</h3>
+        <div id="admin-books-list" class="space-y-2">
+          <!-- Заповнюється JS -->
+        </div>
+      </div>
+
+      <!-- Вкладка 3: Додавання вправ/Генератор -->
+      <div id="tab-add-exercise" class="admin-tab-content hidden space-y-4 max-w-2xl">
+        <h3 class="text-lg font-bold text-white">Додати або Згенерувати вправи</h3>
+        
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Обери підручник</label>
+          <select id="ex-book-select" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none">
+            <!-- Список книг -->
+          </select>
+        </div>
+
+        <!-- Масова генерація -->
+        <div class="p-4 bg-slate-800/60 rounded-xl border border-slate-700 space-y-3">
+          <h4 class="font-semibold text-sm text-blue-400">Швидка генерація кількох номерів</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Від номера</label>
+              <input type="number" id="gen-from" value="1" min="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">До номера</label>
+              <input type="number" id="gen-to" value="50" min="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white">
+            </div>
+          </div>
+          <button onclick="handleBulkGenerate()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-sm transition">
+            Згенерувати номери
+          </button>
+        </div>
+
+        <!-- Додавання одного номера з фото/текстом -->
+        <form onsubmit="handleAddSingleExercise(event)" class="space-y-3 pt-2">
+          <h4 class="font-semibold text-sm text-slate-200">Додати/Оновити конкретну вправу</h4>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Номер / Назва (напр. 154 або ст. 12)</label>
+            <input type="text" id="ex-number" required placeholder="154" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Текстовий розв'язок / Умова</label>
+            <textarea id="ex-text" rows="3" placeholder="Запишіть розв'язок сюди..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">URL фото розв'язку (або вставити посилання)</label>
+            <input type="url" id="ex-image-url" placeholder="https://..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white">
+          </div>
+          <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg text-sm transition">
+            Зберегти вправу
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНЕ ВІКНО ПЕРЕГЛЯДУ ПІДРУЧНИКА ТА ВПРАВ -->
+  <div id="book-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-4xl max-h-[92vh] rounded-2xl flex flex-col overflow-hidden shadow-2xl">
+      
+      <!-- Модальна шапка -->
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900/90">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <img id="modal-book-cover" src="" class="w-10 h-14 object-cover rounded-md bg-slate-800 shrink-0">
+          <div class="truncate">
+            <h3 id="modal-book-title" class="font-bold text-white truncate text-base sm:text-lg">Назва підручника</h3>
+            <p id="modal-book-author" class="text-xs text-slate-400 truncate">Автор</p>
+          </div>
+        </div>
+        <button onclick="closeBookModal()" class="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-800 hover:bg-slate-700 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Основний вміст -->
+      <div class="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-6">
+        
+        <!-- Сітка вправ -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Обери номер:
+            </h4>
+            <span id="modal-structure-badge" class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">Вправи</span>
+          </div>
+          
+          <div id="modal-exercises-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+            <!-- Кнопки номерів -->
+          </div>
+        </div>
+
+        <!-- Відображення розв'язку -->
+        <div id="solution-box" class="hidden border-t border-slate-800 pt-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 id="solution-title" class="font-bold text-lg text-white">Розв'язок №</h4>
+          </div>
+
+          <div class="glass-panel p-4 rounded-xl space-y-4">
+            <div id="solution-text" class="text-slate-200 text-sm whitespace-pre-line leading-relaxed"></div>
+            
+            <div id="solution-image-container" class="hidden img-zoom-container rounded-lg overflow-hidden border border-slate-700">
+              <img id="solution-image" src="" class="w-full h-auto object-contain max-h-[500px]">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- СКРИПТИ ЗВ'ЯЗКУ З FIREBASE REALTIME DATABASE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set, update, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Configuration passed by user
+    // Конфіг Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAmCzZAEKq4BMo6eWAN96IawhF95cH1sHM",
       authDomain: "keysbrawl-c4ae6.firebaseapp.com",
@@ -90,1289 +387,314 @@
       measurementId: "G-PJR0BQBYVM"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Make DB available globally for application functions
-    window.db = db;
-    window.dbRefs = { ref, onValue, set, update, remove, push };
-  </script>
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
-
-  <header class="sticky top-0 z-30 glass-panel border-b border-slate-800/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Brand Logo -->
-      <div class="flex items-center space-x-3 cursor-pointer" onclick="resetFilters()">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-brand-500/20">
-          <i data-lucide="book-open-check" class="w-6 h-6 text-white"></i>
-        </div>
-        <div>
-          <span class="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-indigo-300">
-            ГДЗ Онлайн
-          </span>
-          <span class="hidden sm:inline-block text-xs font-semibold px-2 py-0.5 ml-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">
-            LIVE DB
-          </span>
-        </div>
-      </div>
-
-      <!-- Quick Search Bar -->
-      <div class="flex-1 max-w-md mx-4 sm:mx-8">
-        <div class="relative">
-          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input 
-            type="text" 
-            id="searchInput"
-            placeholder="Пошук книги за назвою або автором..."
-            oninput="handleSearch()"
-            class="w-full bg-slate-900/90 text-sm text-slate-100 placeholder-slate-500 rounded-xl pl-10 pr-4 py-2 border border-slate-800 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all"
-          >
-        </div>
-      </div>
-
-      <!-- Live Sync Indicator -->
-      <div class="flex items-center space-x-3">
-        <div 
-          id="syncBadge" 
-          onclick="checkFirebasePermissionError()" 
-          class="cursor-pointer flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-        >
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="hidden md:inline">Синхронізовано</span>
-        </div>
-        <button 
-          id="adminToggleBtn"
-          onclick="openAdminAuthModal()" 
-          class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors relative"
-          title="Панель керування"
-        >
-          <i data-lucide="shield-lock" class="w-5 h-5"></i>
-          <span id="adminActiveDot" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-brand-500 rounded-full"></span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col space-y-8">
-    
-    <!-- Hero Banner -->
-    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 p-6 sm:p-10">
-      <div class="absolute -top-24 -right-24 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="relative z-10 max-w-2xl">
-        <h1 class="text-2xl sm:text-4xl font-black text-white leading-tight">
-          Знаходь готові домашні завдання за лічені секунди!
-        </h1>
-        <p class="mt-3 text-slate-400 text-sm sm:text-base">
-          Всі підручники синхронізуються в реальному часі. Обирай клас, предмет та номер вправи.
-        </p>
-      </div>
-    </section>
-
-    <!-- Navigation & Filters -->
-    <section class="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-      
-      <!-- Class Filter Selector -->
-      <div class="w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-        <div class="flex items-center space-x-1.5" id="classFilterContainer">
-          <!-- Class buttons rendered via JS -->
-        </div>
-      </div>
-
-      <!-- Subject Dropdown Filter -->
-      <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-end">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Предмет:</span>
-        <select 
-          id="subjectFilterSelect" 
-          onchange="handleSubjectFilter(this.value)"
-          class="bg-slate-900 text-sm text-slate-200 border border-slate-800 rounded-xl px-4 py-2 focus:outline-none focus:border-brand-500 cursor-pointer"
-        >
-          <option value="ALL">Всі предмети</option>
-          <option value="Математика">Математика</option>
-          <option value="Алгебра">Алгебра</option>
-          <option value="Геометрія">Геометрія</option>
-          <option value="Українська мова">Українська мова</option>
-          <option value="Англійська мова">Англійська мова</option>
-          <option value="Фізика">Фізика</option>
-          <option value="Хімія">Хімія</option>
-          <option value="Історія">Історія</option>
-          <option value="Біологія">Біологія</option>
-          <option value="Інше">Інші предмети</option>
-        </select>
-      </div>
-    </section>
-
-    <!-- Books Section Grid -->
-    <section>
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
-          <i data-lucide="book-marked" class="w-5 h-5 text-brand-500"></i>
-          <span>Каталог підручників</span>
-          <span id="booksCountBadge" class="text-xs bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full">0</span>
-        </h2>
-      </div>
-
-      <!-- Books Grid Container -->
-      <div id="booksGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
-        <!-- Rendered via JS -->
-      </div>
-
-      <!-- Empty State -->
-      <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center">
-        <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-slate-500 mb-4 border border-slate-800">
-          <i data-lucide="search-x" class="w-8 h-8"></i>
-        </div>
-        <h3 class="text-base font-semibold text-slate-300">Підручників не знайдено</h3>
-        <p class="text-xs text-slate-500 mt-1 max-w-sm">Спробуйте змінити фільтр класу, предмет або умови пошуку.</p>
-        <button onclick="resetFilters()" class="mt-4 px-4 py-2 text-xs font-semibold bg-brand-600 hover:bg-brand-500 text-white rounded-xl transition-colors">
-          Скинути фільтри
-        </button>
-      </div>
-    </section>
-  </main>
-
-  <footer class="border-t border-slate-800/80 bg-slate-950 py-8 mt-auto">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center space-x-2">
-        <div class="w-6 h-6 rounded-lg bg-brand-600 flex items-center justify-center text-white text-xs font-bold">Г</div>
-        <span class="text-sm font-semibold text-slate-400">ГДЗ Онлайн © 2026. Всі права захищені.</span>
-      </div>
-      
-      <div class="flex items-center space-x-4 text-xs text-slate-500">
-        <span>Синхронізація: Firebase RTDB</span>
-        <span>•</span>
-        <button onclick="openAdminAuthModal()" class="hover:text-slate-300 transition-colors flex items-center gap-1">
-          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-          <span>Вхід для адміна</span>
-        </button>
-      </div>
-    </div>
-  </footer>
-
-  
-  <!-- 1. Book Reader Modal -->
-  <div id="bookReaderModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
-      
-      <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
-        <div class="flex items-center space-x-3 overflow-hidden">
-          <img id="modalBookCover" src="" alt="Cover" class="w-10 h-14 object-cover rounded-md border border-slate-700 flex-shrink-0">
-          <div class="truncate">
-            <h3 id="modalBookTitle" class="font-bold text-slate-100 text-base sm:text-lg truncate">--</h3>
-            <p id="modalBookSub" class="text-xs text-slate-400 truncate">--</p>
-          </div>
-        </div>
-        <button onclick="closeBookReaderModal()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors">
-          <i data-lucide="x" class="w-6 h-6"></i>
-        </button>
-      </div>
-
-      <!-- Modal Body (Split view) -->
-      <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
-        
-        <!-- Left Sidebar: Exercise Grid -->
-        <div class="w-full md:w-80 border-r border-slate-800 flex flex-col bg-slate-950/40 max-h-48 md:max-h-none overflow-hidden">
-          <div class="p-3 border-b border-slate-800/60 bg-slate-900/30">
-            <input 
-              type="text" 
-              id="exerciseSearchInput"
-              placeholder="Швидкий пошук номера..." 
-              oninput="filterExercisesList()"
-              class="w-full bg-slate-900 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 rounded-lg px-3 py-1.5 focus:outline-none focus:border-brand-500"
-            >
-          </div>
-          <div id="exerciseListGrid" class="flex-1 overflow-y-auto p-3 grid grid-cols-4 sm:grid-cols-5 md:grid-cols-3 gap-2">
-            <!-- Items rendered via JS -->
-          </div>
-        </div>
-
-        <!-- Right Content: Solution Display -->
-        <div class="flex-1 flex flex-col overflow-y-auto bg-slate-900/80 p-4 sm:p-6">
-          <div id="solutionContainer" class="flex-1 flex flex-col items-center justify-center min-h-[300px]">
-            <div class="text-center text-slate-500">
-              <i data-lucide="mouse-pointer-click" class="w-12 h-12 mx-auto mb-2 opacity-40"></i>
-              <p class="text-sm">Оберіть номер або завдання зі списку ліворуч</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 2. Admin Auth Modal -->
-  <div id="adminAuthModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl">
-      <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 rounded-lg bg-brand-600/20 text-brand-400 flex items-center justify-center">
-            <i data-lucide="shield" class="w-5 h-5"></i>
-          </div>
-          <h3 class="text-lg font-bold text-white">Вхід до Адмін-панелі</h3>
-        </div>
-        <button onclick="closeAdminAuthModal()" class="text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1.5">Введіть пароль адміністратора</label>
-          <input 
-            type="password" 
-            id="adminPasswordInput"
-            placeholder="Пароль..." 
-            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500"
-            required
-          >
-          <p id="adminAuthError" class="text-xs text-rose-500 mt-1.5 hidden">Невірний пароль! Спробуйте ще раз.</p>
-        </div>
-        <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm rounded-xl transition-colors shadow-lg shadow-brand-500/20">
-          Увійти
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 3. Full Admin Panel Modal -->
-  <div id="adminPanelModal" class="fixed inset-0 z-50 hidden bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-6">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-6xl h-[92vh] flex flex-col overflow-hidden shadow-2xl">
-      
-      <!-- Admin Header -->
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
-        <div class="flex items-center space-x-3">
-          <div class="w-9 h-9 rounded-xl bg-brand-600/20 text-brand-400 flex items-center justify-center">
-            <i data-lucide="sliders" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h2 class="font-bold text-white text-base sm:text-lg">Панель Адміністратора (Firebase Live)</h2>
-            <p class="text-xs text-slate-400">Усі зміни автоматично синхронізуються для всіх користувачів</p>
-          </div>
-        </div>
-        <button onclick="closeAdminPanelModal()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800">
-          <i data-lucide="x" class="w-6 h-6"></i>
-        </button>
-      </div>
-
-      <!-- Admin Desktop Recommendation Banner for Mobile -->
-      <div class="md:hidden bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-amber-300 text-xs flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <i data-lucide="monitor" class="w-4 h-4 flex-shrink-0"></i>
-          <span>Для зручного керування рекомендуємо використовувати ПК.</span>
-        </div>
-      </div>
-
-      <!-- Admin Navigation Tabs -->
-      <div class="flex border-b border-slate-800 bg-slate-950/40 overflow-x-auto scrollbar-none px-4">
-        <button onclick="switchAdminTab('addBook')" id="tabBtn-addBook" class="admin-tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-brand-400 border-b-2 border-brand-500 whitespace-nowrap flex items-center gap-2">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i> Додати підручник
-        </button>
-        <button onclick="switchAdminTab('manageBooks')" id="tabBtn-manageBooks" class="admin-tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
-          <i data-lucide="book-open" class="w-4 h-4"></i> Керування книгами
-        </button>
-        <button onclick="switchAdminTab('addExercises')" id="tabBtn-addExercises" class="admin-tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
-          <i data-lucide="layers" class="w-4 h-4"></i> Додати / Згенерувати вправи
-        </button>
-        <button onclick="switchAdminTab('manageExercises')" id="tabBtn-manageExercises" class="admin-tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
-          <i data-lucide="file-edit" class="w-4 h-4"></i> Керування вправами
-        </button>
-        <button onclick="switchAdminTab('seedData')" id="tabBtn-seedData" class="admin-tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
-          <i data-lucide="database" class="w-4 h-4"></i> Початкові дані
-        </button>
-      </div>
-
-      <!-- Admin Tab Contents Container -->
-      <div class="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-900/50">
-        
-        <!-- TAB 1: Add Book -->
-        <div id="tabContent-addBook" class="admin-tab-content space-y-6 max-w-3xl mx-auto">
-          <div class="bg-slate-950/60 p-6 rounded-2xl border border-slate-800">
-            <h3 class="text-base font-bold text-white mb-4">Створення нового підручника</h3>
-            <form onsubmit="handleCreateBook(event)" class="space-y-4">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-400 mb-1">Назва підручника</label>
-                  <input type="text" id="newBookTitle" required placeholder="напр., Алгебра" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-400 mb-1">Автор(и)</label>
-                  <input type="text" id="newBookAuthor" required placeholder="напр., О.С. Істер" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-400 mb-1">Клас (1-11)</label>
-                  <select id="newBookClass" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
-                    <option value="1">1 клас</option>
-                    <option value="2">2 клас</option>
-                    <option value="3">3 клас</option>
-                    <option value="4">4 клас</option>
-                    <option value="5">5 клас</option>
-                    <option value="6">6 клас</option>
-                    <option value="7" selected>7 клас</option>
-                    <option value="8">8 клас</option>
-                    <option value="9">9 клас</option>
-                    <option value="10">10 клас</option>
-                    <option value="11">11 клас</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-400 mb-1">Предмет</label>
-                  <select id="newBookSubject" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
-                    <option value="Математика">Математика</option>
-                    <option value="Алгебра">Алгебра</option>
-                    <option value="Геометрія">Геометрія</option>
-                    <option value="Українська мова">Українська мова</option>
-                    <option value="Англійська мова">Англійська мова</option>
-                    <option value="Фізика">Фізика</option>
-                    <option value="Хімія">Хімія</option>
-                    <option value="Історія">Історія</option>
-                    <option value="Біологія">Біологія</option>
-                    <option value="Інше">Інше</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-xs font-semibold text-slate-400 mb-1">Тип структури нумерації</label>
-                <select id="newBookType" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
-                  <option value="Вправи">Вправи (№ 1, № 2, № 3...)</option>
-                  <option value="Сторінки">Сторінки (ст. 1, ст. 2...)</option>
-                  <option value="Units">Units / Розділи (Unit 1, Unit 2...)</option>
-                  <option value="Параграфи">Параграфи (§ 1, § 2...)</option>
-                </select>
-              </div>
-
-              <!-- Cover Selection -->
-              <div>
-                <label class="block text-xs font-semibold text-slate-400 mb-1">Обкладинка підручника</label>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input type="url" id="newBookCoverUrl" placeholder="URL зображення..." class="bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
-                  <div class="relative">
-                    <input type="file" id="newBookCoverFile" accept="image/*" onchange="convertFileToBase64(this, 'newBookCoverUrl')" class="hidden">
-                    <button type="button" onclick="document.getElementById('newBookCoverFile').click()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 flex items-center justify-center gap-2">
-                      <i data-lucide="upload" class="w-4 h-4"></i> Завантажити фото з пристрою
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm rounded-xl transition-colors shadow-lg shadow-brand-500/20">
-                Зберегти підручник у Firebase
-              </button>
-            </form>
-          </div>
-        </div>
-
-        <!-- TAB 2: Manage Books -->
-        <div id="tabContent-manageBooks" class="admin-tab-content space-y-4 hidden">
-          <div id="adminBooksList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Rendered via JS -->
-          </div>
-        </div>
-
-        <!-- TAB 3: Add / Bulk Generate Exercises -->
-        <div id="tabContent-addExercises" class="admin-tab-content space-y-6 hidden max-w-4xl mx-auto">
-          
-          <!-- Select Target Book -->
-          <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
-            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Оберіть підручник для заповнення</label>
-            <select id="exerciseTargetBookSelect" onchange="updateSelectedBookForExercises()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
-              <!-- Rendered via JS -->
-            </select>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <!-- Bulk Generator -->
-            <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 space-y-4">
-              <h4 class="text-sm font-bold text-white flex items-center gap-2">
-                <i data-lucide="sparkles" class="w-4 h-4 text-brand-400"></i>
-                Масова генерація вправ
-              </h4>
-              <p class="text-xs text-slate-400">Створіть сітку номерів за лічені секунди (наприклад, від №1 до №150).</p>
-              
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-xs text-slate-400 mb-1">Від (номер)</label>
-                  <input type="number" id="bulkFrom" value="1" min="1" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-sm text-white">
-                </div>
-                <div>
-                  <label class="block text-xs text-slate-400 mb-1">До (номер)</label>
-                  <input type="number" id="bulkTo" value="50" min="1" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-sm text-white">
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-xs text-slate-400 mb-1">Префікс (напр. №, ст., Unit)</label>
-                <input type="text" id="bulkPrefix" value="№ " class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-sm text-white">
-              </div>
-
-              <button onclick="handleBulkGenerate()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition-colors">
-                Згенерувати сітку номерів
-              </button>
-            </div>
-
-            <!-- Single Exercise Add -->
-            <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 space-y-4">
-              <h4 class="text-sm font-bold text-white flex items-center gap-2">
-                <i data-lucide="plus" class="w-4 h-4 text-emerald-400"></i>
-                Додати поодиноку вправу / фото
-              </h4>
-
-              <form onsubmit="handleSingleExerciseAdd(event)" class="space-y-3">
-                <div>
-                  <label class="block text-xs text-slate-400 mb-1">Номер або назва</label>
-                  <input type="text" id="singleExNumber" placeholder="напр. № 125 або ст. 45" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-sm text-white">
-                </div>
-
-                <div>
-                  <label class="block text-xs text-slate-400 mb-1">Текстове розв'язання / умова</label>
-                  <textarea id="singleExText" rows="2" placeholder="Введіть текст розв'язку..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none"></textarea>
-                </div>
-
-                <div>
-                  <label class="block text-xs text-slate-400 mb-1">Фото розв'язку (URL або файл)</label>
-                  <input type="url" id="singleExImageUrl" placeholder="URL фото розв'язку..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white mb-2">
-                  <input type="file" id="singleExFile" accept="image/*" onchange="convertFileToBase64(this, 'singleExImageUrl')" class="hidden">
-                  <button type="button" onclick="document.getElementById('singleExFile').click()" class="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl flex items-center justify-center gap-2">
-                    <i data-lucide="image" class="w-3.5 h-3.5"></i> Завантажити фото з пристрою
-                  </button>
-                </div>
-
-                <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl transition-colors">
-                  Додати / Оновити вправу
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 4: Manage Exercises -->
-        <div id="tabContent-manageExercises" class="admin-tab-content space-y-4 hidden">
-          <div class="flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
-            <select id="exerciseManageBookSelect" onchange="renderManageExercisesList()" class="w-full sm:w-auto bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white">
-              <!-- Rendered via JS -->
-            </select>
-            <button onclick="handleDeleteAllExercisesInBook()" class="w-full sm:w-auto px-4 py-2 bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 text-xs font-semibold rounded-xl border border-rose-500/30">
-              Видалити всі вправи книги
-            </button>
-          </div>
-
-          <div id="manageExercisesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            <!-- Rendered via JS -->
-          </div>
-        </div>
-
-        <!-- TAB 5: Seed Data -->
-        <div id="tabContent-seedData" class="admin-tab-content space-y-6 hidden max-w-xl mx-auto text-center py-8">
-          <div class="bg-slate-950/60 p-8 rounded-3xl border border-slate-800 space-y-4">
-            <div class="w-16 h-16 bg-brand-600/20 text-brand-400 rounded-2xl flex items-center justify-center mx-auto">
-              <i data-lucide="database-backup" class="w-8 h-8"></i>
-            </div>
-            <h3 class="text-lg font-bold text-white">Заповнення бази демонстраційними даними</h3>
-            <p class="text-xs text-slate-400">Якщо ваша база даних у Firebase порожня, ви можете натиснути цю кнопку, щоб завантажити початковий набір підручників з готовими номерами.</p>
-            <button onclick="seedInitialFirebaseData()" class="px-6 py-3 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-brand-500/20">
-              Завантажити демо-базу даних
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <div id="imageLightboxModal" class="fixed inset-0 z-50 hidden bg-slate-950/95 backdrop-blur-lg flex items-center justify-center p-4">
-    <button onclick="closeLightbox()" class="absolute top-4 right-4 p-3 text-slate-300 hover:text-white bg-slate-900/80 rounded-full">
-      <i data-lucide="x" class="w-6 h-6"></i>
-    </button>
-    <img id="lightboxImage" src="" alt="Full view" class="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl">
-  </div>
-
-  <!-- 4. Firebase Rules Setup Helper Modal -->
-  <div id="firebaseRulesModal" class="fixed inset-0 z-50 hidden bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-rose-500/40 rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-4">
-      <div class="flex items-start justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-black text-lg">!</div>
-          <div>
-            <h3 class="text-base font-bold text-white">Помилка доступу до Firebase (Permission Denied)</h3>
-            <p class="text-xs text-rose-400">Правила безпеки вашої бази заблокували доступ.</p>
-          </div>
-        </div>
-        <button onclick="closeFirebaseRulesModal()" class="text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <p class="text-xs text-slate-300 leading-relaxed">
-        Ваш проєкт <span class="text-white font-semibold">keysbrawl-c4ae6</span> закритий для читання/запису. Щоб сайт працював у реальному часі для всіх, дозвольте доступ у консолі Firebase:
-      </p>
-
-      <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
-        <div class="flex justify-between items-center text-xs text-slate-400">
-          <span class="font-semibold text-slate-300">Як це виправити за 30 секунд:</span>
-          <a href="https://console.firebase.google.com/" target="_blank" class="text-brand-400 hover:underline flex items-center gap-1 font-semibold">
-            Firebase Console <i data-lucide="external-link" class="w-3 h-3"></i>
-          </a>
-        </div>
-        <ol class="text-xs text-slate-300 space-y-1.5 list-decimal list-inside">
-          <li>У консолі відкрийте проєкт <strong class="text-white">keysbrawl-c4ae6</strong></li>
-          <li>Перейдіть у <strong class="text-white">Build &rarr; Realtime Database</strong> &rarr; вкладка <strong class="text-white">Rules</strong></li>
-          <li>Вставляєте код нижче та тиснете <strong class="text-white">Publish</strong>:</li>
-        </ol>
-      </div>
-
-      <div class="relative bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400">
-        <pre><code>{
-  "rules": {
-    ".read": true,
-    ".write": true
-  }
-}</code></pre>
-        <button onclick="copyFirebaseRulesText()" class="absolute top-2.5 right-2.5 px-3 py-1 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-[10px] font-sans font-semibold transition-colors">
-          Скопіювати правила
-        </button>
-      </div>
-
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2">
-        <button onclick="loadLocalDemoFallback()" class="w-full sm:w-auto px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">
-          Читати локальні дані (Demo)
-        </button>
-        <button onclick="closeFirebaseRulesModal(); location.reload();" class="w-full sm:w-auto px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition-colors">
-          Я оновив правила (Перезавантажити)
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // State Management
-    let state = {
+    // Глобальний стан
+    window.appState = {
       books: {},
-      selectedClass: 'ALL',
-      selectedSubject: 'ALL',
+      selectedClass: null,
       searchQuery: '',
-      currentReaderBookId: null,
-      currentReaderExerciseId: null,
-      adminAuthenticated: false,
-      selectedManageBookId: null
+      activeBookId: null
     };
 
-    let hasFirebasePermissionError = false;
+    // Слухаємо базу даних в реальному часі
+    const booksRef = ref(db, 'books');
+    onValue(booksRef, (snapshot) => {
+      const data = snapshot.val();
+      window.appState.books = data || {};
+      renderBooks();
+      renderAdminBooks();
+      updateBookSelectOptions();
+    });
 
-    // Global Initialization
-    window.onload = function() {
-      initIcons();
-      renderClassFilters();
-      initFirebaseSync();
+    // Збереження в Firebase
+    window.saveBookToFirebase = function(bookId, bookData) {
+      set(ref(db, 'books/' + bookId), bookData);
     };
 
-    function initIcons() {
-      if (window.lucide) {
-        lucide.createIcons();
+    window.deleteBookFromFirebase = function(bookId) {
+      if(confirm('Ви дійсно бажаєте видалити цей підручник?')) {
+        remove(ref(db, 'books/' + bookId));
       }
-    }
+    };
+  </script>
 
-    // Initialize Firebase Realtime Database Listener
-    function initFirebaseSync() {
-      const checkDbInterval = setInterval(() => {
-        if (window.db && window.dbRefs) {
-          clearInterval(checkDbInterval);
-          
-          const booksRef = window.dbRefs.ref(window.db, 'books');
-          
-          // Listen to Realtime Updates across all clients
-          window.dbRefs.onValue(booksRef, (snapshot) => {
-            hasFirebasePermissionError = false;
-            const data = snapshot.val() || {};
-            state.books = data;
-            
-            // Re-render UI elements
-            renderBooksGrid();
-            populateAdminBookSelectors();
-            
-            if (state.currentReaderBookId && state.books[state.currentReaderBookId]) {
-              renderExerciseListForReader();
-            }
-
-            if (state.selectedManageBookId) {
-              renderManageExercisesList();
-            }
-
-            updateSyncBadge(true);
-          }, (error) => {
-            console.error("Firebase Sync Error:", error);
-            if (error.message && error.message.includes('permission_denied')) {
-              hasFirebasePermissionError = true;
-              updateSyncBadge(false, 'Немає доступу (Rules)');
-              showFirebaseRulesModal();
-            } else {
-              updateSyncBadge(false, 'Помилка мережі');
-            }
-          });
-        }
-      }, 100);
-    }
-
-    function updateSyncBadge(isOnline, customText) {
-      const badge = document.getElementById('syncBadge');
-      if (!badge) return;
-      if (isOnline) {
-        badge.className = "cursor-pointer flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="hidden md:inline">${customText || 'Синхронізовано'}</span>`;
-      } else {
-        badge.className = "cursor-pointer flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20";
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span><span class="hidden md:inline">${customText || 'Помилка мережі'}</span>`;
-      }
-    }
-
-    function checkFirebasePermissionError() {
-      if (hasFirebasePermissionError) {
-        showFirebaseRulesModal();
-      }
-    }
-
-    function showFirebaseRulesModal() {
-      document.getElementById('firebaseRulesModal')?.classList.remove('hidden');
-    }
-
-    function closeFirebaseRulesModal() {
-      document.getElementById('firebaseRulesModal')?.classList.add('hidden');
-    }
-
-    function copyFirebaseRulesText() {
-      const rules = `{\n  "rules": {\n    ".read": true,\n    ".write": true\n  }\n}`;
-      const tempArea = document.createElement('textarea');
-      tempArea.value = rules;
-      document.body.appendChild(tempArea);
-      tempArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempArea);
-      alert('Правила скопійовано у буфер обміну!');
-    }
-
-    function loadLocalDemoFallback() {
-      closeFirebaseRulesModal();
-      seedInitialFirebaseData(true);
-    }
-
-    function renderClassFilters() {
-      const container = document.getElementById('classFilterContainer');
-      const classes = ['ALL', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
-      
-      container.innerHTML = classes.map(cls => {
-        const isSelected = state.selectedClass === cls;
-        const label = cls === 'ALL' ? 'Усі класи' : `${cls} клас`;
-        const activeClass = isSelected 
-          ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20' 
-          : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800';
-          
-        return `
-          <button 
-            onclick="handleClassFilter('${cls}')"
-            class="px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${activeClass}"
-          >
-            ${label}
-          </button>
-        `;
-      }).join('');
-    }
-
-    function handleClassFilter(cls) {
-      state.selectedClass = cls;
-      renderClassFilters();
-      renderBooksGrid();
-    }
-
-    function handleSubjectFilter(subj) {
-      state.selectedSubject = subj;
-      renderBooksGrid();
-    }
-
+  <!-- ОСНОВНИЙ ЛОГІЧНИЙ СКРИПТ -->
+  <script>
+    // Пошук
     function handleSearch() {
-      state.searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-      renderBooksGrid();
+      const query = document.getElementById('main-search-input').value.toLowerCase().trim();
+      window.appState.searchQuery = query;
+      document.getElementById('search-clear-btn').classList.toggle('hidden', query === '');
+      renderBooks();
     }
 
-    function resetFilters() {
-      state.selectedClass = 'ALL';
-      state.selectedSubject = 'ALL';
-      state.searchQuery = '';
-      document.getElementById('searchInput').value = '';
-      document.getElementById('subjectFilterSelect').value = 'ALL';
-      renderClassFilters();
-      renderBooksGrid();
+    function clearSearch() {
+      document.getElementById('main-search-input').value = '';
+      window.appState.searchQuery = '';
+      document.getElementById('search-clear-btn').classList.add('hidden');
+      renderBooks();
     }
 
-    function renderBooksGrid() {
-      const grid = document.getElementById('booksGrid');
-      const emptyState = document.getElementById('emptyState');
-      const countBadge = document.getElementById('booksCountBadge');
-
-      const bookKeys = Object.keys(state.books || {});
+    // Фільтр класів
+    function filterByClass(grade) {
+      window.appState.selectedClass = grade;
       
-      const filteredKeys = bookKeys.filter(key => {
-        const book = state.books[key];
-        
-        // Filter by class
-        if (state.selectedClass !== 'ALL' && String(book.class) !== String(state.selectedClass)) {
-          return false;
-        }
-
-        // Filter by subject
-        if (state.selectedSubject !== 'ALL' && book.subject !== state.selectedSubject) {
-          return false;
-        }
-
-        // Filter by search query
-        if (state.searchQuery) {
-          const titleMatch = book.title?.toLowerCase().includes(state.searchQuery);
-          const authorMatch = book.author?.toLowerCase().includes(state.searchQuery);
-          if (!titleMatch && !authorMatch) return false;
-        }
-
-        return true;
+      document.querySelectorAll('.class-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('bg-slate-800', 'text-slate-300');
       });
 
-      countBadge.textContent = filteredKeys.length;
-
-      if (filteredKeys.length === 0) {
-        grid.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        emptyState.classList.add('flex');
-        return;
+      if(grade === null) {
+        document.getElementById('class-btn-all').classList.add('bg-blue-600', 'text-white');
+        document.getElementById('reset-class-btn').classList.add('hidden');
+      } else {
+        document.getElementById(`class-btn-${grade}`).classList.add('bg-blue-600', 'text-white');
+        document.getElementById('reset-class-btn').classList.remove('hidden');
       }
 
-      emptyState.classList.add('hidden');
-      emptyState.classList.remove('flex');
+      renderBooks();
+    }
 
-      grid.innerHTML = filteredKeys.map(key => {
-        const book = state.books[key];
-        const defaultCover = 'https://placehold.co/300x400/1e293b/6366f1?text=' + encodeURIComponent(book.title);
-        const coverUrl = book.cover || defaultCover;
+    // Відображення книг
+    function renderBooks() {
+      const grid = document.getElementById('books-grid');
+      const emptyState = document.getElementById('empty-state');
+      const books = window.appState.books;
+      
+      grid.innerHTML = '';
+      let count = 0;
 
-        return `
-          <div 
-            onclick="openBookReaderModal('${key}')"
-            class="glass-card rounded-2xl p-3 flex flex-col justify-between cursor-pointer group"
-          >
+      Object.keys(books).forEach(id => {
+        const book = books[id];
+        
+        // Фільтрація
+        if(window.appState.selectedClass && parseInt(book.grade) !== parseInt(window.appState.selectedClass)) {
+          return;
+        }
+
+        if(window.appState.searchQuery) {
+          const q = window.appState.searchQuery;
+          const matchTitle = book.title ? book.title.toLowerCase().includes(q) : false;
+          const matchAuthor = book.author ? book.author.toLowerCase().includes(q) : false;
+          const matchSubject = book.subject ? book.subject.toLowerCase().includes(q) : false;
+          if(!matchTitle && !matchAuthor && !matchSubject) return;
+        }
+
+        count++;
+
+        const cover = book.coverUrl || 'https://via.placeholder.com/150x200/1e293b/ffffff?text=Підручник';
+        
+        const card = document.createElement('div');
+        card.className = 'glass-panel rounded-xl overflow-hidden cursor-pointer hover:border-blue-500/50 transition group flex flex-col';
+        card.onclick = () => openBookModal(id);
+
+        card.innerHTML = `
+          <div class="aspect-[3/4] bg-slate-800 overflow-hidden relative">
+            <img src="${cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+            <span class="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+              ${book.grade} клас
+            </span>
+          </div>
+          <div class="p-3 flex flex-col flex-1 justify-between">
             <div>
-              <div class="relative aspect-[3/4] rounded-xl overflow-hidden mb-3 bg-slate-950 border border-slate-800">
-                <img 
-                  src="${coverUrl}" 
-                  alt="${book.title}" 
-                  onerror="this.src='${defaultCover}'"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                >
-                <span class="absolute top-2 left-2 px-2 py-0.5 bg-slate-950/80 backdrop-blur-md text-[10px] font-extrabold text-brand-300 rounded-md border border-slate-700">
-                  ${book.class} клас
-                </span>
-              </div>
-              <h3 class="font-bold text-slate-100 text-xs sm:text-sm line-clamp-2 group-hover:text-brand-300 transition-colors">
+              <h3 class="font-bold text-white text-xs sm:text-sm line-clamp-2 leading-snug group-hover:text-blue-400 transition">
                 ${book.title}
               </h3>
-              <p class="text-[11px] text-slate-400 mt-1 truncate">
-                ${book.author}
-              </p>
+              <p class="text-[11px] text-slate-400 truncate mt-1">${book.author || ''}</p>
             </div>
-            
-            <div class="mt-3 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-500">
-              <span>${book.subject}</span>
-              <span class="text-brand-400 font-semibold flex items-center gap-1">
-                ГДЗ <i data-lucide="chevron-right" class="w-3 h-3"></i>
-              </span>
-            </div>
+            <span class="inline-block text-[10px] text-slate-500 mt-2">${book.subject || ''}</span>
           </div>
         `;
-      }).join('');
 
-      initIcons();
-    }
-
-    function openBookReaderModal(bookId) {
-      state.currentReaderBookId = bookId;
-      state.currentReaderExerciseId = null;
-
-      const book = state.books[bookId];
-      if (!book) return;
-
-      document.getElementById('modalBookTitle').textContent = `${book.title} (${book.class} клас)`;
-      document.getElementById('modalBookSub').textContent = `Автор: ${book.author} • Предмет: ${book.subject}`;
-      document.getElementById('modalBookCover').src = book.cover || 'https://placehold.co/100x140/1e293b/ffffff?text=Book';
-
-      renderExerciseListForReader();
-      renderSolutionView();
-
-      document.getElementById('bookReaderModal').classList.remove('hidden');
-    }
-
-    function closeBookReaderModal() {
-      document.getElementById('bookReaderModal').classList.add('hidden');
-      state.currentReaderBookId = null;
-      state.currentReaderExerciseId = null;
-    }
-
-    function renderExerciseListForReader() {
-      const grid = document.getElementById('exerciseListGrid');
-      const book = state.books[state.currentReaderBookId];
-      if (!book || !book.exercises) {
-        grid.innerHTML = `<p class="col-span-full text-center text-xs text-slate-500 py-6">Вправ ще немає</p>`;
-        return;
-      }
-
-      const searchVal = (document.getElementById('exerciseSearchInput')?.value || '').toLowerCase().trim();
-      const exKeys = Object.keys(book.exercises);
-
-      const filteredKeys = exKeys.filter(k => {
-        const ex = book.exercises[k];
-        if (!searchVal) return true;
-        return ex.number?.toLowerCase().includes(searchVal);
+        grid.appendChild(card);
       });
 
-      if (filteredKeys.length === 0) {
-        grid.innerHTML = `<p class="col-span-full text-center text-xs text-slate-500 py-6">Нічого не знайдено</p>`;
-        return;
-      }
-
-      grid.innerHTML = filteredKeys.map(k => {
-        const ex = book.exercises[k];
-        const isSelected = state.currentReaderExerciseId === k;
-        const activeClass = isSelected
-          ? 'bg-brand-600 text-white font-bold border-brand-500 shadow-md shadow-brand-500/30'
-          : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border-slate-800';
-
-        return `
-          <button 
-            onclick="selectReaderExercise('${k}')"
-            class="px-2 py-2 rounded-xl text-xs text-center border transition-all truncate ${activeClass}"
-          >
-            ${ex.number}
-          </button>
-        `;
-      }).join('');
+      document.getElementById('books-count').innerText = `Знайдено: ${count}`;
+      emptyState.classList.toggle('hidden', count > 0);
     }
 
-    function filterExercisesList() {
-      renderExerciseListForReader();
-    }
+    // Відкриття Модалки Книги
+    function openBookModal(id) {
+      const book = window.appState.books[id];
+      if(!book) return;
 
-    function selectReaderExercise(exId) {
-      state.currentReaderExerciseId = exId;
-      renderExerciseListForReader();
-      renderSolutionView();
-    }
+      window.appState.activeBookId = id;
+      document.getElementById('modal-book-title').innerText = book.title;
+      document.getElementById('modal-book-author').innerText = book.author;
+      document.getElementById('modal-book-cover').src = book.coverUrl || 'https://via.placeholder.com/150';
+      document.getElementById('modal-structure-badge').innerText = book.structure || 'Вправи';
 
-    function renderSolutionView() {
-      const container = document.getElementById('solutionContainer');
-      const book = state.books[state.currentReaderBookId];
+      const exercisesGrid = document.getElementById('modal-exercises-grid');
+      exercisesGrid.innerHTML = '';
+      document.getElementById('solution-box').classList.add('hidden');
 
-      if (!book || !state.currentReaderExerciseId || !book.exercises[state.currentReaderExerciseId]) {
-        container.innerHTML = `
-          <div class="text-center text-slate-500">
-            <i data-lucide="mouse-pointer-click" class="w-12 h-12 mx-auto mb-2 opacity-40"></i>
-            <p class="text-sm">Оберіть номер або завдання зі списку ліворуч</p>
-          </div>
-        `;
-        initIcons();
-        return;
-      }
+      const exercises = book.exercises || {};
+      const keys = Object.keys(exercises);
 
-      const ex = book.exercises[state.currentReaderExerciseId];
-
-      container.innerHTML = `
-        <div class="w-full max-w-2xl bg-slate-950/70 border border-slate-800 rounded-2xl p-5 space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
-            <span class="text-base font-extrabold text-brand-400">${ex.number}</span>
-            <span class="text-xs text-slate-500">Готове рішення</span>
-          </div>
-
-          ${ex.text ? `
-            <div class="text-sm text-slate-200 leading-relaxed bg-slate-900/90 p-4 rounded-xl border border-slate-800">
-              ${ex.text.replace(/\n/g, '<br>')}
-            </div>
-          ` : ''}
-
-          ${ex.image ? `
-            <div class="relative group cursor-zoom-in rounded-xl overflow-hidden border border-slate-800 bg-slate-900" onclick="openLightbox('${ex.image}')">
-              <img src="${ex.image}" alt="Solution" class="w-full object-contain max-h-[450px]">
-              <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-2">
-                <i data-lucide="maximize-2" class="w-4 h-4"></i> Натисніть для збільшення
-              </div>
-            </div>
-          ` : ''}
-
-          ${!ex.text && !ex.image ? `
-            <p class="text-xs text-slate-500 text-center py-4">Розв'язок для цієї вправи готується до публікації.</p>
-          ` : ''}
-        </div>
-      `;
-
-      initIcons();
-    }
-
-    function openLightbox(src) {
-      document.getElementById('lightboxImage').src = src;
-      document.getElementById('imageLightboxModal').classList.remove('hidden');
-    }
-
-    function closeLightbox() {
-      document.getElementById('imageLightboxModal').classList.add('hidden');
-    }
-
-    function openAdminAuthModal() {
-      if (state.adminAuthenticated) {
-        openAdminPanelModal();
+      if(keys.length === 0) {
+        exercisesGrid.innerHTML = `<p class="col-span-full text-slate-500 text-xs py-4 text-center">Вправ поки немає.</p>`;
       } else {
-        document.getElementById('adminAuthModal').classList.remove('hidden');
+        keys.forEach(num => {
+          const btn = document.createElement('button');
+          btn.className = 'p-2 rounded-lg bg-slate-800 hover:bg-blue-600 text-slate-200 hover:text-white text-xs font-semibold border border-slate-700/50 transition';
+          btn.innerText = num;
+          btn.onclick = () => showSolution(id, num);
+          exercisesGrid.appendChild(btn);
+        });
       }
+
+      document.getElementById('book-modal').classList.remove('hidden');
     }
 
-    function closeAdminAuthModal() {
-      document.getElementById('adminAuthModal').classList.add('hidden');
-      document.getElementById('adminAuthError').classList.add('hidden');
+    function closeBookModal() {
+      document.getElementById('book-modal').classList.add('hidden');
     }
 
-    function handleAdminLogin(e) {
-      e.preventDefault();
-      const pass = document.getElementById('adminPasswordInput').value;
-      if (pass === '12345678') {
-        state.adminAuthenticated = true;
-        document.getElementById('adminActiveDot').classList.remove('hidden');
-        closeAdminAuthModal();
-        openAdminPanelModal();
+    function showSolution(bookId, num) {
+      const ex = window.appState.books[bookId]?.exercises?.[num];
+      if(!ex) return;
+
+      document.getElementById('solution-title').innerText = `Розв'язок: № ${num}`;
+      document.getElementById('solution-text').innerText = ex.text || 'Текстовий розв\'язок відсутній.';
+      
+      const imgContainer = document.getElementById('solution-image-container');
+      if(ex.imageUrl) {
+        document.getElementById('solution-image').src = ex.imageUrl;
+        imgContainer.classList.remove('hidden');
       } else {
-        document.getElementById('adminAuthError').classList.remove('hidden');
+        imgContainer.classList.add('hidden');
+      }
+
+      document.getElementById('solution-box').classList.remove('hidden');
+    }
+
+    // Вхід в адмінку
+    function promptAdminLogin() {
+      const pass = prompt('Введіть пароль адміністратора:');
+      if(pass === '12345678') {
+        document.getElementById('portal-view').classList.add('hidden');
+        document.getElementById('admin-view').classList.remove('hidden');
+      } else if(pass !== null) {
+        alert('Невірний пароль!');
       }
     }
 
-    function openAdminPanelModal() {
-      document.getElementById('adminPanelModal').classList.remove('hidden');
-      populateAdminBookSelectors();
-      switchAdminTab('addBook');
+    function showPortal() {
+      document.getElementById('admin-view').classList.add('hidden');
+      document.getElementById('portal-view').classList.remove('hidden');
     }
 
-    function closeAdminPanelModal() {
-      document.getElementById('adminPanelModal').classList.add('hidden');
-    }
-
-    function switchAdminTab(tabName) {
+    function switchAdminTab(tabId) {
+      document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-        btn.className = "admin-tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2";
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('bg-slate-800', 'text-slate-300');
       });
-      document.querySelectorAll('.admin-tab-content').forEach(content => content.classList.add('hidden'));
 
-      const activeBtn = document.getElementById(`tabBtn-${tabName}`);
-      const activeContent = document.getElementById(`tabContent-${tabName}`);
-
-      if (activeBtn) {
-        activeBtn.className = "admin-tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-brand-400 border-b-2 border-brand-500 whitespace-nowrap flex items-center gap-2";
-      }
-      if (activeContent) {
-        activeContent.classList.remove('hidden');
-      }
-
-      if (tabName === 'manageBooks') {
-        renderAdminBooksList();
-      } else if (tabName === 'manageExercises') {
-        renderManageExercisesList();
-      }
+      document.getElementById(tabId).classList.remove('hidden');
+      document.getElementById(`btn-${tabId}`).classList.add('bg-blue-600', 'text-white');
     }
 
-    function populateAdminBookSelectors() {
-      const exTarget = document.getElementById('exerciseTargetBookSelect');
-      const exManageTarget = document.getElementById('exerciseManageBookSelect');
-      
-      const bookKeys = Object.keys(state.books || {});
-      
-      if (bookKeys.length === 0) {
-        const noBooksOpt = `<option value="">Спочатку додайте підручник...</option>`;
-        exTarget.innerHTML = noBooksOpt;
-        exManageTarget.innerHTML = noBooksOpt;
-        return;
-      }
-
-      const optionsHtml = bookKeys.map(k => {
-        const b = state.books[k];
-        return `<option value="${k}">${b.class} клас — ${b.title} (${b.author})</option>`;
-      }).join('');
-
-      exTarget.innerHTML = optionsHtml;
-      exManageTarget.innerHTML = optionsHtml;
-
-      if (!state.selectedManageBookId || !state.books[state.selectedManageBookId]) {
-        state.selectedManageBookId = bookKeys[0];
-      }
-    }
-
-    function updateSelectedBookForExercises() {
-      state.selectedManageBookId = document.getElementById('exerciseTargetBookSelect').value;
-    }
-
-
-    // 1. Create Book
-    function handleCreateBook(e) {
+    // Додавання книги через адмінку
+    function handleAddBook(e) {
       e.preventDefault();
-      
-      const title = document.getElementById('newBookTitle').value.trim();
-      const author = document.getElementById('newBookAuthor').value.trim();
-      const bookClass = document.getElementById('newBookClass').value;
-      const subject = document.getElementById('newBookSubject').value;
-      const type = document.getElementById('newBookType').value;
-      const coverUrl = document.getElementById('newBookCoverUrl').value.trim();
-
-      if (!title || !author) return;
-
-      const newBookRef = window.dbRefs.push(window.dbRefs.ref(window.db, 'books'));
-      
-      const newBookData = {
-        title,
-        author,
-        class: Number(bookClass),
-        subject,
-        type,
-        cover: coverUrl || `https://placehold.co/300x400/1e293b/6366f1?text=${encodeURIComponent(title)}`,
+      const id = 'book_' + Date.now();
+      const newBook = {
+        title: document.getElementById('book-title').value,
+        author: document.getElementById('book-author').value,
+        grade: document.getElementById('book-grade').value,
+        subject: document.getElementById('book-subject').value,
+        structure: document.getElementById('book-structure').value,
+        coverUrl: document.getElementById('book-cover-url').value,
         exercises: {}
       };
 
-      window.dbRefs.set(newBookRef, newBookData).then(() => {
-        alert("Підручник успішно збережено у Firebase!");
-        e.target.reset();
-        switchAdminTab('manageBooks');
-      }).catch(err => {
-        alert("Помилка збереження: " + err.message);
+      window.saveBookToFirebase(id, newBook);
+      alert('Підручник збережено в Firebase!');
+      e.target.reset();
+    }
+
+    // Керування списком книг в адмінці
+    function renderAdminBooks() {
+      const list = document.getElementById('admin-books-list');
+      list.innerHTML = '';
+      const books = window.appState.books;
+
+      Object.keys(books).forEach(id => {
+        const b = books[id];
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between p-3 bg-slate-800/80 rounded-lg border border-slate-700';
+        item.innerHTML = `
+          <div>
+            <span class="font-bold text-white text-sm">${b.title}</span>
+            <span class="text-xs text-slate-400 ml-2">(${b.grade} клас, ${b.author})</span>
+          </div>
+          <button onclick="window.deleteBookFromFirebase('${id}')" class="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white text-xs rounded transition">
+            Видалити
+          </button>
+        `;
+        list.appendChild(item);
       });
     }
 
-    // 2. Render and Manage Books
-    function renderAdminBooksList() {
-      const container = document.getElementById('adminBooksList');
-      const keys = Object.keys(state.books || {});
+    function updateBookSelectOptions() {
+      const select = document.getElementById('ex-book-select');
+      select.innerHTML = '';
+      const books = window.appState.books;
 
-      if (keys.length === 0) {
-        container.innerHTML = `<p class="col-span-full text-center text-xs text-slate-500 py-8">Книг у базі поки немає.</p>`;
-        return;
-      }
-
-      container.innerHTML = keys.map(k => {
-        const b = state.books[k];
-        const exCount = b.exercises ? Object.keys(b.exercises).length : 0;
-
-        return `
-          <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 flex space-x-4 items-center">
-            <img src="${b.cover}" alt="cover" class="w-14 h-20 object-cover rounded-lg border border-slate-800 flex-shrink-0">
-            <div class="flex-1 overflow-hidden">
-              <span class="text-[10px] font-bold text-brand-400 uppercase">${b.class} клас • ${b.subject}</span>
-              <h4 class="font-bold text-white text-sm truncate">${b.title}</h4>
-              <p class="text-xs text-slate-400 truncate">${b.author}</p>
-              <p class="text-[11px] text-slate-500 mt-1">Вправ у базі: ${exCount}</p>
-            </div>
-            <button 
-              onclick="handleDeleteBook('${k}')" 
-              class="p-2 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors"
-              title="Видалити книгу"
-            >
-              <i data-lucide="trash-2" class="w-5 h-5"></i>
-            </button>
-          </div>
-        `;
-      }).join('');
-
-      initIcons();
+      Object.keys(books).forEach(id => {
+        const b = books[id];
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.innerText = `${b.title} (${b.grade} клас)`;
+        select.appendChild(opt);
+      });
     }
 
-    function handleDeleteBook(bookId) {
-      if (confirm("Ви дійсно бажаєте видалити цей підручник та всі його вправи з Firebase?")) {
-        const bookRef = window.dbRefs.ref(window.db, `books/${bookId}`);
-        window.dbRefs.remove(bookRef).then(() => {
-          alert("Підручник видалено з Firebase!");
-        });
-      }
-    }
-
-    // 3. Bulk Generate Exercises
+    // Масова генерація
     function handleBulkGenerate() {
-      const bookId = document.getElementById('exerciseTargetBookSelect').value;
-      if (!bookId || !state.books[bookId]) {
-        alert("Оберіть підручник!");
-        return;
-      }
+      const bookId = document.getElementById('ex-book-select').value;
+      if(!bookId) return alert('Оберіть підручник!');
 
-      const fromNum = parseInt(document.getElementById('bulkFrom').value, 10);
-      const toNum = parseInt(document.getElementById('bulkTo').value, 10);
-      const prefix = document.getElementById('bulkPrefix').value;
+      const from = parseInt(document.getElementById('gen-from').value);
+      const to = parseInt(document.getElementById('gen-to').value);
 
-      if (isNaN(fromNum) || isNaN(toNum) || fromNum > toNum) {
-        alert("Введіть коректні номери!");
-        return;
-      }
+      if(from > to) return alert('Початковий номер більший за кінцевий!');
 
-      const updates = {};
-      for (let i = fromNum; i <= toNum; i++) {
-        const newExRef = window.dbRefs.push(window.dbRefs.ref(window.db, `books/${bookId}/exercises`));
-        updates[`books/${bookId}/exercises/${newExRef.key}`] = {
-          number: `${prefix}${i}`,
-          text: '',
-          image: ''
+      const book = window.appState.books[bookId];
+      if(!book.exercises) book.exercises = {};
+
+      for(let i = from; i <= to; i++) {
+        book.exercises[i] = {
+          text: `Розв'язок для номера ${i} буде додано незабаром.`,
+          imageUrl: ''
         };
       }
 
-      window.dbRefs.update(window.dbRefs.ref(window.db), updates).then(() => {
-        alert(`Згенеровано вправ: ${toNum - fromNum + 1}`);
-        state.selectedManageBookId = bookId;
-        switchAdminTab('manageExercises');
-      });
+      window.saveBookToFirebase(bookId, book);
+      alert(`Згенеровано номери з ${from} по ${to}!`);
     }
 
-    // 4. Single Exercise Add/Edit
-    function handleSingleExerciseAdd(e) {
+    // Додавання однієї вправи
+    function handleAddSingleExercise(e) {
       e.preventDefault();
-      const bookId = document.getElementById('exerciseTargetBookSelect').value;
-      if (!bookId || !state.books[bookId]) {
-        alert("Оберіть підручник!");
-        return;
-      }
+      const bookId = document.getElementById('ex-book-select').value;
+      if(!bookId) return alert('Оберіть підручник!');
 
-      const number = document.getElementById('singleExNumber').value.trim();
-      const text = document.getElementById('singleExText').value.trim();
-      const image = document.getElementById('singleExImageUrl').value.trim();
+      const num = document.getElementById('ex-number').value.trim();
+      const text = document.getElementById('ex-text').value;
+      const imageUrl = document.getElementById('ex-image-url').value;
 
-      if (!number) return;
+      const book = window.appState.books[bookId];
+      if(!book.exercises) book.exercises = {};
 
-      const newExRef = window.dbRefs.push(window.dbRefs.ref(window.db, `books/${bookId}/exercises`));
-      
-      window.dbRefs.set(newExRef, { number, text, image }).then(() => {
-        alert("Вправу успішно додано!");
-        e.target.reset();
-        document.getElementById('singleExImageUrl').value = '';
-        state.selectedManageBookId = bookId;
-        switchAdminTab('manageExercises');
-      });
-    }
+      book.exercises[num] = { text, imageUrl };
 
-    // 5. Manage & Delete Individual Exercises
-    function renderManageExercisesList() {
-      const bookId = document.getElementById('exerciseManageBookSelect').value || state.selectedManageBookId;
-      state.selectedManageBookId = bookId;
-
-      const grid = document.getElementById('manageExercisesGrid');
-      const book = state.books[bookId];
-
-      if (!book || !book.exercises) {
-        grid.innerHTML = `<p class="col-span-full text-center text-xs text-slate-500 py-8">Вправ у цьому підручнику немає.</p>`;
-        return;
-      }
-
-      const keys = Object.keys(book.exercises);
-
-      grid.innerHTML = keys.map(k => {
-        const ex = book.exercises[k];
-        return `
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col justify-between space-y-2">
-            <div>
-              <span class="text-xs font-bold text-white">${ex.number}</span>
-              ${ex.image ? '<span class="ml-1 text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">Фото</span>' : ''}
-              ${ex.text ? '<p class="text-[10px] text-slate-400 line-clamp-2 mt-1">' + ex.text + '</p>' : ''}
-            </div>
-            <button 
-              onclick="handleDeleteSingleExercise('${bookId}', '${k}')"
-              class="w-full py-1 bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 text-[10px] font-semibold rounded-lg border border-rose-500/30"
-            >
-              Видалити
-            </button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function handleDeleteSingleExercise(bookId, exId) {
-      const exRef = window.dbRefs.ref(window.db, `books/${bookId}/exercises/${exId}`);
-      window.dbRefs.remove(exRef);
-    }
-
-    function handleDeleteAllExercisesInBook() {
-      const bookId = document.getElementById('exerciseManageBookSelect').value;
-      if (!bookId) return;
-
-      if (confirm("Ви дійсно хочете видалити ВСІ вправи з цієї книги?")) {
-        const exRef = window.dbRefs.ref(window.db, `books/${bookId}/exercises`);
-        window.dbRefs.remove(exRef).then(() => {
-          alert("Всі вправи видалено!");
-        });
-      }
-    }
-
-    // Helper: Convert File Upload to Base64 String for Fast Storage
-    function convertFileToBase64(input, targetUrlInputId) {
-      const file = input.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById(targetUrlInputId).value = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function seedInitialFirebaseData(localOnly = false) {
-      const demoBooks = {
-        book1: {
-          title: "Алгебра",
-          author: "О.С. Істер",
-          class: 7,
-          subject: "Алгебра",
-          type: "Вправи",
-          cover: "https://placehold.co/300x400/1e293b/6366f1?text=%D0%90%D0%BB%D0%B3%D0%B5%D0%B1%D1%80%D0%B0+7",
-          exercises: {
-            e1: { number: "№ 1", text: "Знайдіть значення виразу: 2x + 5, якщо x = 3.\nРозв'язання:\n2 * 3 + 5 = 6 + 5 = 11.\nВідповідь: 11." },
-            e2: { number: "№ 2", text: "Спростіть вираз: 3a + 4b - a + 2b.\nРозв'язання:\n(3a - a) + (4b + 2b) = 2a + 6b.\nВідповідь: 2a + 6b." },
-            e3: { number: "№ 3", text: "Розв'яжіть рівняння: 5x - 10 = 0.\n5x = 10\nx = 2.\nВідповідь: 2." }
-          }
-        },
-        book2: {
-          title: "Геометрія",
-          author: "А.Г. Мерзляк",
-          class: 8,
-          subject: "Геометрія",
-          type: "Вправи",
-          cover: "https://placehold.co/300x400/1e293b/818cf8?text=%D0%93%D0%B5%D0%BE%D0%BC%D0%B5%D1%82%D1%80%D1%96%D1%8F+8",
-          exercises: {
-            e1: { number: "№ 10", text: "Знайдіть периметр прямокутника зі сторонами 4 см і 7 см.\nP = 2 * (4 + 7) = 2 * 11 = 22 см." }
-          }
-        },
-        book3: {
-          title: "Українська мова",
-          author: "О.П. Глазова",
-          class: 9,
-          subject: "Українська мова",
-          type: "Вправи",
-          cover: "https://placehold.co/300x400/1e293b/38bdf8?text=%D0%A3%D0%BA%D1%80+%D0%9C%D0%BE%D0%B2%D0%B0+9",
-          exercises: {
-            e1: { number: "Вправа 15", text: "Запишіть речення, розставляючи розділові знаки." }
-          }
-        }
-      };
-
-      if (localOnly || hasFirebasePermissionError) {
-        state.books = demoBooks;
-        renderBooksGrid();
-        populateAdminBookSelectors();
-        alert("Завантажено локальні демо-дані. Оновіть правила у Firebase Console для збереження у хмару!");
-        return;
-      }
-
-      if (!confirm("Завантажити початковий демо-набір книг та вправ у вашу базу Firebase?")) return;
-
-      const booksRef = window.dbRefs.ref(window.db, 'books');
-      window.dbRefs.set(booksRef, demoBooks).then(() => {
-        alert("Демонстраційні дані успішно завантажені у Firebase!");
-        closeAdminPanelModal();
-      }).catch(err => {
-        alert("Помилка завантаження: " + err.message);
-        state.books = demoBooks;
-        renderBooksGrid();
-        populateAdminBookSelectors();
-      });
+      window.saveBookToFirebase(bookId, book);
+      alert(`Вправу №${num} збережено!`);
+      e.target.reset();
     }
   </script>
 </body>
