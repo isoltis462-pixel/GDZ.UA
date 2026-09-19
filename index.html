@@ -273,7 +273,7 @@
       <!-- Modal Body (Split view) -->
       <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
         
-        <!-- Left Sidebar: Exercise Grid (ФІКС ДЛЯ МОБІЛОК ТУТ) -->
+        <!-- Left Sidebar: Exercise Grid -->
         <div class="w-full md:w-80 border-r border-slate-800 flex flex-col bg-slate-950/40 h-[35vh] md:h-auto md:max-h-none overflow-hidden shrink-0">
           <div class="p-3 border-b border-slate-800/60 bg-slate-900/30">
             <input 
@@ -284,7 +284,7 @@
               class="w-full bg-slate-900 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 rounded-lg px-3 py-1.5 focus:outline-none focus:border-brand-500"
             >
           </div>
-          <div id="exerciseListGrid" class="flex-1 overflow-y-auto p-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 gap-2 content-start">
+          <div id="exerciseListGrid" class="flex-1 overflow-y-auto p-3 grid grid-cols-3 gap-2 content-start">
             <!-- Items rendered via JS -->
           </div>
         </div>
@@ -377,9 +377,6 @@
         </button>
         <button onclick="switchAdminTab('manageExercises')" id="tabBtn-manageExercises" class="admin-tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
           <i data-lucide="file-edit" class="w-4 h-4"></i> Керування вправами
-        </button>
-        <button onclick="switchAdminTab('seedData')" id="tabBtn-seedData" class="admin-tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
-          <i data-lucide="database" class="w-4 h-4"></i> Початкові дані
         </button>
       </div>
 
@@ -505,7 +502,7 @@
 
               <div>
                 <label class="block text-xs text-slate-400 mb-1">Префікс (напр. №, ст., Unit)</label>
-                <input type="text" id="bulkPrefix" value="№ " class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-sm text-white">
+                <input type="text" id="bulkPrefix" value="" placeholder="Залиште пустим для просто цифр" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-sm text-white">
               </div>
 
               <button onclick="handleBulkGenerate()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition-colors">
@@ -523,7 +520,7 @@
               <form onsubmit="handleSingleExerciseAdd(event)" class="space-y-3">
                 <div>
                   <label class="block text-xs text-slate-400 mb-1">Номер або назва</label>
-                  <input type="text" id="singleExNumber" placeholder="напр. № 125 або ст. 45" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-sm text-white">
+                  <input type="text" id="singleExNumber" placeholder="напр. 125 або ст. 45" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-sm text-white">
                 </div>
 
                 <div>
@@ -564,20 +561,6 @@
           </div>
         </div>
 
-        <!-- TAB 5: Seed Data -->
-        <div id="tabContent-seedData" class="admin-tab-content space-y-6 hidden max-w-xl mx-auto text-center py-8">
-          <div class="bg-slate-950/60 p-8 rounded-3xl border border-slate-800 space-y-4">
-            <div class="w-16 h-16 bg-brand-600/20 text-brand-400 rounded-2xl flex items-center justify-center mx-auto">
-              <i data-lucide="database-backup" class="w-8 h-8"></i>
-            </div>
-            <h3 class="text-lg font-bold text-white">Заповнення бази демонстраційними даними</h3>
-            <p class="text-xs text-slate-400">Якщо ваша база даних у Firebase порожня, ви можете натиснути цю кнопку, щоб завантажити початковий набір підручників з готовими номерами.</p>
-            <button onclick="seedInitialFirebaseData()" class="px-6 py-3 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-brand-500/20">
-              Завантажити демо-базу даних
-            </button>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>
@@ -589,63 +572,6 @@
     <img id="lightboxImage" src="" alt="Full view" class="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl">
   </div>
 
-  <!-- 4. Firebase Rules Setup Helper Modal -->
-  <div id="firebaseRulesModal" class="fixed inset-0 z-50 hidden bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-rose-500/40 rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-4">
-      <div class="flex items-start justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-black text-lg">!</div>
-          <div>
-            <h3 class="text-base font-bold text-white">Помилка доступу до Firebase (Permission Denied)</h3>
-            <p class="text-xs text-rose-400">Правила безпеки вашої бази заблокували доступ.</p>
-          </div>
-        </div>
-        <button onclick="closeFirebaseRulesModal()" class="text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <p class="text-xs text-slate-300 leading-relaxed">
-        Ваш проєкт <span class="text-white font-semibold">keysbrawl-c4ae6</span> закритий для читання/запису. Щоб сайт працював у реальному часі для всіх, дозвольте доступ у консолі Firebase:
-      </p>
-
-      <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
-        <div class="flex justify-between items-center text-xs text-slate-400">
-          <span class="font-semibold text-slate-300">Як це виправити за 30 секунд:</span>
-          <a href="https://console.firebase.google.com/" target="_blank" class="text-brand-400 hover:underline flex items-center gap-1 font-semibold">
-            Firebase Console <i data-lucide="external-link" class="w-3 h-3"></i>
-          </a>
-        </div>
-        <ol class="text-xs text-slate-300 space-y-1.5 list-decimal list-inside">
-          <li>У консолі відкрийте проєкт <strong class="text-white">keysbrawl-c4ae6</strong></li>
-          <li>Перейдіть у <strong class="text-white">Build &rarr; Realtime Database</strong> &rarr; вкладка <strong class="text-white">Rules</strong></li>
-          <li>Вставляєте код нижче та тиснете <strong class="text-white">Publish</strong>:</li>
-        </ol>
-      </div>
-
-      <div class="relative bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400">
-        <pre><code>{
-  "rules": {
-    ".read": true,
-    ".write": true
-  }
-}</code></pre>
-        <button onclick="copyFirebaseRulesText()" class="absolute top-2.5 right-2.5 px-3 py-1 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-[10px] font-sans font-semibold transition-colors">
-          Скопіювати правила
-        </button>
-      </div>
-
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2">
-        <button onclick="loadLocalDemoFallback()" class="w-full sm:w-auto px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">
-          Читати локальні дані (Demo)
-        </button>
-        <button onclick="closeFirebaseRulesModal(); location.reload();" class="w-full sm:w-auto px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition-colors">
-          Я оновив правила (Перезавантажити)
-        </button>
-      </div>
-    </div>
-  </div>
-
   <script>
     // State Management
     let state = {
@@ -655,7 +581,7 @@
       searchQuery: '',
       currentReaderBookId: null,
       currentReaderExerciseId: null,
-      currentExerciseKeys: [], // Додано для стрілок навігації
+      currentExerciseKeys: [],
       adminAuthenticated: false,
       selectedManageBookId: null
     };
@@ -666,6 +592,17 @@
     window.onload = function() {
       initIcons();
       renderClassFilters();
+      
+      // FIX 3: Миттєве завантаження з кешу (LocalStorage)
+      const cachedData = localStorage.getItem('gdz_books_cache');
+      if (cachedData) {
+        try {
+          state.books = JSON.parse(cachedData);
+          renderBooksGrid();
+          populateAdminBookSelectors();
+        } catch(e) { console.error("Cache parsing error", e); }
+      }
+
       initFirebaseSync();
     };
 
@@ -687,7 +624,10 @@
           window.dbRefs.onValue(booksRef, (snapshot) => {
             hasFirebasePermissionError = false;
             const data = snapshot.val() || {};
+            
+            // Оновлюємо стейт і кеш
             state.books = data;
+            localStorage.setItem('gdz_books_cache', JSON.stringify(data));
             
             // Re-render UI elements
             renderBooksGrid();
@@ -704,13 +644,7 @@
             updateSyncBadge(true);
           }, (error) => {
             console.error("Firebase Sync Error:", error);
-            if (error.message && error.message.includes('permission_denied')) {
-              hasFirebasePermissionError = true;
-              updateSyncBadge(false, 'Немає доступу (Rules)');
-              showFirebaseRulesModal();
-            } else {
-              updateSyncBadge(false, 'Помилка мережі');
-            }
+            updateSyncBadge(false, 'Помилка мережі');
           });
         }
       }, 100);
@@ -726,36 +660,6 @@
         badge.className = "cursor-pointer flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20";
         badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span><span class="hidden md:inline">${customText || 'Помилка мережі'}</span>`;
       }
-    }
-
-    function checkFirebasePermissionError() {
-      if (hasFirebasePermissionError) {
-        showFirebaseRulesModal();
-      }
-    }
-
-    function showFirebaseRulesModal() {
-      document.getElementById('firebaseRulesModal')?.classList.remove('hidden');
-    }
-
-    function closeFirebaseRulesModal() {
-      document.getElementById('firebaseRulesModal')?.classList.add('hidden');
-    }
-
-    function copyFirebaseRulesText() {
-      const rules = `{\n  "rules": {\n    ".read": true,\n    ".write": true\n  }\n}`;
-      const tempArea = document.createElement('textarea');
-      tempArea.value = rules;
-      document.body.appendChild(tempArea);
-      tempArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempArea);
-      alert('Правила скопійовано у буфер обміну!');
-    }
-
-    function loadLocalDemoFallback() {
-      closeFirebaseRulesModal();
-      seedInitialFirebaseData(true);
     }
 
     function renderClassFilters() {
@@ -918,7 +822,7 @@
       const grid = document.getElementById('exerciseListGrid');
       const book = state.books[state.currentReaderBookId];
       if (!book || !book.exercises) {
-        state.currentExerciseKeys = []; // Очищуємо масив
+        state.currentExerciseKeys = []; 
         grid.innerHTML = `<p class="col-span-full text-center text-xs text-slate-500 py-6">Вправ ще немає</p>`;
         return;
       }
@@ -926,11 +830,12 @@
       const searchVal = (document.getElementById('exerciseSearchInput')?.value || '').toLowerCase().trim();
       const exKeys = Object.keys(book.exercises);
 
-      // Розумне сортування ключів (щоб № 2 йшло після № 1, а не після № 10)
+      // FIX 2: Розумне сортування через localeCompare 
       exKeys.sort((a, b) => {
-        const numA = parseInt(book.exercises[a].number.replace(/\D/g, '')) || 0;
-        const numB = parseInt(book.exercises[b].number.replace(/\D/g, '')) || 0;
-        return numA - numB;
+        const valA = book.exercises[a].number || '';
+        const valB = book.exercises[b].number || '';
+        // Це ідеально відсортує: 1, 2, 1-2, 10, Проєкт
+        return valA.localeCompare(valB, 'uk', { numeric: true, sensitivity: 'base' });
       });
 
       const filteredKeys = exKeys.filter(k => {
@@ -939,7 +844,7 @@
         return ex.number?.toLowerCase().includes(searchVal);
       });
 
-      state.currentExerciseKeys = filteredKeys; // Зберігаємо для стрілок
+      state.currentExerciseKeys = filteredKeys;
 
       if (filteredKeys.length === 0) {
         grid.innerHTML = `<p class="col-span-full text-center text-xs text-slate-500 py-6">Нічого не знайдено</p>`;
@@ -953,10 +858,11 @@
           ? 'bg-brand-600 text-white font-bold border-brand-500 shadow-md shadow-brand-500/30'
           : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border-slate-800';
 
+        // FIX 1: Змінено класи кнопки: прибрано truncate, додано flex, min-h-[44px]
         return `
           <button 
             onclick="selectReaderExercise('${k}')"
-            class="px-2 py-2 rounded-xl text-xs text-center border transition-all truncate ${activeClass}"
+            class="p-2 rounded-xl text-xs text-center border transition-all flex items-center justify-center min-h-[44px] leading-tight break-words ${activeClass}"
           >
             ${ex.number}
           </button>
@@ -969,7 +875,7 @@
     }
 
     function selectReaderExercise(exId) {
-      if (!exId || exId === 'null') return; // Запобіжник для порожніх кнопок навігації
+      if (!exId || exId === 'null') return; 
       state.currentReaderExerciseId = exId;
       renderExerciseListForReader();
       renderSolutionView();
@@ -992,7 +898,6 @@
 
       const ex = book.exercises[state.currentReaderExerciseId];
 
-      // Визначаємо попередню та наступну вправи для стрілок
       const currentIndex = state.currentExerciseKeys.indexOf(state.currentReaderExerciseId);
       const prevId = currentIndex > 0 ? state.currentExerciseKeys[currentIndex - 1] : null;
       const nextId = currentIndex < state.currentExerciseKeys.length - 1 ? state.currentExerciseKeys[currentIndex + 1] : null;
@@ -1005,7 +910,7 @@
           </div>
 
           ${ex.text ? `
-            <div class="text-sm text-slate-200 leading-relaxed bg-slate-900/90 p-4 rounded-xl border border-slate-800">
+            <div class="text-sm text-slate-200 leading-relaxed bg-slate-900/90 p-4 rounded-xl border border-slate-800 break-words">
               ${ex.text.replace(/\n/g, '<br>')}
             </div>
           ` : ''}
@@ -1144,8 +1049,6 @@
       state.selectedManageBookId = document.getElementById('exerciseTargetBookSelect').value;
     }
 
-
-    // 1. Create Book
     function handleCreateBook(e) {
       e.preventDefault();
       
@@ -1179,7 +1082,6 @@
       });
     }
 
-    // 2. Render and Manage Books
     function renderAdminBooksList() {
       const container = document.getElementById('adminBooksList');
       const keys = Object.keys(state.books || {});
@@ -1225,7 +1127,6 @@
       }
     }
 
-    // 3. Bulk Generate Exercises
     function handleBulkGenerate() {
       const bookId = document.getElementById('exerciseTargetBookSelect').value;
       if (!bookId || !state.books[bookId]) {
@@ -1259,7 +1160,6 @@
       });
     }
 
-    // 4. Single Exercise Add/Edit
     function handleSingleExerciseAdd(e) {
       e.preventDefault();
       const bookId = document.getElementById('exerciseTargetBookSelect').value;
@@ -1285,7 +1185,6 @@
       });
     }
 
-    // 5. Manage & Delete Individual Exercises
     function renderManageExercisesList() {
       const bookId = document.getElementById('exerciseManageBookSelect').value || state.selectedManageBookId;
       state.selectedManageBookId = bookId;
@@ -1337,7 +1236,6 @@
       }
     }
 
-    // Helper: Convert File Upload to Base64 String for Fast Storage
     function convertFileToBase64(input, targetUrlInputId) {
       const file = input.files[0];
       if (!file) return;
@@ -1347,67 +1245,6 @@
         document.getElementById(targetUrlInputId).value = e.target.result;
       };
       reader.readAsDataURL(file);
-    }
-
-    function seedInitialFirebaseData(localOnly = false) {
-      const demoBooks = {
-        book1: {
-          title: "Алгебра",
-          author: "О.С. Істер",
-          class: 7,
-          subject: "Алгебра",
-          type: "Вправи",
-          cover: "https://placehold.co/300x400/1e293b/6366f1?text=%D0%90%D0%BB%D0%B3%D0%B5%D0%B1%D1%80%D0%B0+7",
-          exercises: {
-            e1: { number: "№ 1", text: "Знайдіть значення виразу: 2x + 5, якщо x = 3.\nРозв'язання:\n2 * 3 + 5 = 6 + 5 = 11.\nВідповідь: 11." },
-            e2: { number: "№ 2", text: "Спростіть вираз: 3a + 4b - a + 2b.\nРозв'язання:\n(3a - a) + (4b + 2b) = 2a + 6b.\nВідповідь: 2a + 6b." },
-            e3: { number: "№ 3", text: "Розв'яжіть рівняння: 5x - 10 = 0.\n5x = 10\nx = 2.\nВідповідь: 2." }
-          }
-        },
-        book2: {
-          title: "Геометрія",
-          author: "А.Г. Мерзляк",
-          class: 8,
-          subject: "Геометрія",
-          type: "Вправи",
-          cover: "https://placehold.co/300x400/1e293b/818cf8?text=%D0%93%D0%B5%D0%BE%D0%BC%D0%B5%D1%82%D1%80%D1%96%D1%8F+8",
-          exercises: {
-            e1: { number: "№ 10", text: "Знайдіть периметр прямокутника зі сторонами 4 см і 7 см.\nP = 2 * (4 + 7) = 2 * 11 = 22 см." }
-          }
-        },
-        book3: {
-          title: "Українська мова",
-          author: "О.П. Глазова",
-          class: 9,
-          subject: "Українська мова",
-          type: "Вправи",
-          cover: "https://placehold.co/300x400/1e293b/38bdf8?text=%D0%A3%D0%BA%D1%80+%D0%9C%D0%BE%D0%B2%D0%B0+9",
-          exercises: {
-            e1: { number: "Вправа 15", text: "Запишіть речення, розставляючи розділові знаки." }
-          }
-        }
-      };
-
-      if (localOnly || hasFirebasePermissionError) {
-        state.books = demoBooks;
-        renderBooksGrid();
-        populateAdminBookSelectors();
-        alert("Завантажено локальні демо-дані. Оновіть правила у Firebase Console для збереження у хмару!");
-        return;
-      }
-
-      if (!confirm("Завантажити початковий демо-набір книг та вправ у вашу базу Firebase?")) return;
-
-      const booksRef = window.dbRefs.ref(window.db, 'books');
-      window.dbRefs.set(booksRef, demoBooks).then(() => {
-        alert("Демонстраційні дані успішно завантажені у Firebase!");
-        closeAdminPanelModal();
-      }).catch(err => {
-        alert("Помилка завантаження: " + err.message);
-        state.books = demoBooks;
-        renderBooksGrid();
-        populateAdminBookSelectors();
-      });
     }
   </script>
 </body>
